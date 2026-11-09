@@ -23,6 +23,8 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 3. Open Snapframe. macOS will block the first launch because the app is not notarized. Go to System Settings > Privacy & Security and choose **Open Anyway**.
 4. Grant Screen Recording when asked, then restart Snapframe from its window.
 
+Snapframe has no Dock icon. Look for its icon in the menu bar. Opening the app again shows Settings.
+
 Later versions install from inside the app, and your settings and permissions stay as they are.
 
 ## Default shortcuts

@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingWindow: NSWindow?
     private var shortcutObserver: AnyCancellable?
     private var updateWindow: NSWindow?
+    private var launchHint: PillPanel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let menu = StatusMenuController()
@@ -30,8 +31,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKeys.register(settings.shortcuts)
         shortcutObserver = settings.$shortcuts.dropFirst().sink { hotKeys.register($0) }
 
-        if !PermissionManager.isScreenRecordingGranted {
+        if PermissionManager.isScreenRecordingGranted {
+            showRunningHint()
+        } else {
             showOnboarding()
+        }
+    }
+
+    /// A menu-bar app has no window of its own, so opening it again would otherwise look like nothing happened.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if PermissionManager.isScreenRecordingGranted {
+            showSettings()
+        } else {
+            showOnboarding()
+        }
+        return false
+    }
+
+    private func showRunningHint() {
+        let shortcut = settings.shortcuts[.area]?.displayString
+        let message = "Snapframe is in the menu bar" + (shortcut.map { "  ·  Press \($0) to capture" } ?? "")
+        let hint = PillPanel(message: message, fontSize: 13)
+        hint.onClick = { [weak self, weak hint] in
+            hint?.close()
+            self?.showSettings()
+        }
+        hint.showBottomLeft()
+        launchHint = hint
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            MainActor.assumeIsolated {
+                self?.launchHint?.close()
+                self?.launchHint = nil
+            }
         }
     }
 

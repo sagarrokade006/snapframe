@@ -44,7 +44,10 @@ final class UpdateController: ObservableObject {
     func start() {
         guard isConfigured, schedule == nil else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self] in
-            MainActor.assumeIsolated { self?.checkIfDue() }
+            MainActor.assumeIsolated {
+                guard let self, self.automaticallyChecks else { return }
+                Task { await self.check(userInitiated: false) }
+            }
         }
         schedule = Timer.scheduledTimer(withTimeInterval: 60 * 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.checkIfDue() }
