@@ -1,8 +1,20 @@
+<img src="docs/icon.png" width="128" alt="Snapframe app icon">
+
 # Snapframe
 
 A free menu-bar screenshot app for macOS 14 and later.
 
 Snapframe has no accounts, uploads, online models, analytics or crash reporting. Its only network use is checking GitHub for app updates.
+
+## Screenshots
+
+![Selecting an area to capture, with its size shown and resize handles](docs/screenshots/area.png)
+
+![Highlighting a window to capture](docs/screenshots/window.png)
+
+| Screenshot settings | Global shortcuts |
+|---|---|
+| ![Screenshot settings](docs/screenshots/settings.png) | ![Global shortcut settings](docs/screenshots/shortcuts.png) |
 
 ## Install
 

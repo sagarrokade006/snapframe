@@ -169,11 +169,25 @@ enum PreviewRenderer {
         context.setFillColor(CGColor(srgbRed: 0.91, green: 0.91, blue: 0.9, alpha: 1))
         context.fill(CGRect(x: 180, y: 690, width: 920, height: 40))
 
-        context.setFillColor(CGColor(srgbRed: 0.5, green: 0.5, blue: 0.48, alpha: 1))
-        for row in 0..<14 {
-            let lineWidth = CGFloat(420 + (row * 53) % 260)
-            context.fill(CGRect(x: 240, y: 640 - CGFloat(row) * 34, width: lineWidth, height: 10))
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: false)
+        let ink = NSColor(srgbRed: 0.14, green: 0.15, blue: 0.16, alpha: 1)
+        func draw(_ text: String, y: CGFloat, size: CGFloat, weight: NSFont.Weight) {
+            (text as NSString).draw(
+                at: CGPoint(x: 240, y: y),
+                withAttributes: [.font: NSFont.systemFont(ofSize: size, weight: weight), .foregroundColor: ink]
+            )
         }
+        draw("Launch notes", y: 700, size: 14, weight: .semibold)
+        draw("Launch notes", y: 620, size: 36, weight: .bold)
+        draw("Check the onboarding copy before the next build.", y: 565, size: 20, weight: .regular)
+        draw("Confirm the shortcut defaults on a clean account.", y: 525, size: 20, weight: .regular)
+        draw("Record the walkthrough once permissions are final.", y: 485, size: 20, weight: .regular)
+        draw("Open questions", y: 415, size: 26, weight: .semibold)
+        draw("Should the capture sound be on by default?", y: 370, size: 20, weight: .regular)
+        draw("Which file name reads best in Finder?", y: 330, size: 20, weight: .regular)
+        draw("Does the loupe need a color readout?", y: 290, size: 20, weight: .regular)
+        NSGraphicsContext.restoreGraphicsState()
         return context.makeImage()!
     }
 }
