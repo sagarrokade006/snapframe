@@ -154,6 +154,8 @@ public enum CanvasFill: Codable, Equatable, Sendable {
     case none
     case color(UInt32)
     case gradient(UInt32, UInt32)
+    /// Any number of evenly spaced colors at any angle.
+    case linear([UInt32], angle: Double)
 }
 
 public struct CanvasStyle: Codable, Equatable, Sendable {

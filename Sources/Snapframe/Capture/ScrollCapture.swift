@@ -319,7 +319,7 @@ struct ScrollProgressView: View {
             }
 
             ZStack {
-                Color(hex: 0x26282D)
+                Color.snapControl
                 if let preview = controller.preview {
                     Image(nsImage: preview).resizable().aspectRatio(contentMode: .fit).padding(6)
                 }
@@ -329,7 +329,7 @@ struct ScrollProgressView: View {
 
             Text(controller.note)
                 .font(.system(size: 13))
-                .foregroundStyle(controller.isWarning ? Color.snapAccent : Color(hex: 0xC4C6CC))
+                .foregroundStyle(controller.isWarning ? Color.snapAccent : Color.snapSoft)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 8) {

@@ -193,6 +193,18 @@ final class StudioRenderer {
                 "inputColor0": color(start),
                 "inputColor1": color(end),
             ])?.outputImage?.cropped(to: canvas) ?? CIImage(color: .black).cropped(to: canvas)
+        case .linear(let stops, let angle):
+            image = drawn(width: Int(canvas.width), height: Int(canvas.height)) { context in
+                let colors = stops.map { snapCGColor($0) } as CFArray
+                guard let gradient = CGGradient(colorsSpace: self.space, colors: colors, locations: nil) else { return }
+                let line = CanvasFill.gradientLine(angle: angle, size: canvas.size)
+                context.drawLinearGradient(
+                    gradient,
+                    start: CGPoint(x: line.start.x, y: canvas.height - line.start.y),
+                    end: CGPoint(x: line.end.x, y: canvas.height - line.end.y),
+                    options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
+                )
+            }
         }
         background = (key, image)
         return image

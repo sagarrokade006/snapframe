@@ -12,16 +12,23 @@ extension Color {
         )
     }
 
-    static let snapAccent = Color(hex: 0xFF6B3D)
-    static let snapPanel = Color(nsColor: Palette.panel)
-    static let snapGround = Color(hex: 0x101113)
-    static let snapSidebar = Color(hex: 0x17181B)
-    static let snapCard = Color(hex: 0x1F2125)
-    static let snapRaised = Color(hex: 0x2C2E33)
-    static let snapLine = Color(hex: 0x32343A)
-    static let snapText = Color(hex: 0xF4F3F0)
-    static let snapMuted = Color(hex: 0xA8ABB3)
+    static let snapAccent = Color(nsColor: themedColor { _, accent in accent })
+    /// The accent where it is text or a thin line, which stays readable on light themes.
+    static let snapAccentText = Color(nsColor: themedColor { palette, accent in palette.accentText(accent) })
+    static let snapPanel = Color(nsColor: themedColor { palette, _ in palette.sidebar })
+    static let snapGround = Color(nsColor: themedColor { palette, _ in palette.ground })
+    static let snapSidebar = Color(nsColor: themedColor { palette, _ in palette.sidebar })
+    static let snapCard = Color(nsColor: themedColor { palette, _ in palette.card })
+    static let snapControl = Color(nsColor: themedColor { palette, _ in palette.control })
+    static let snapRaised = Color(nsColor: themedColor { palette, _ in palette.raised })
+    static let snapLine = Color(nsColor: themedColor { palette, _ in palette.line })
+    static let snapText = Color(nsColor: themedColor { palette, _ in palette.text })
+    static let snapSoft = Color(nsColor: themedColor { palette, _ in palette.soft })
+    static let snapMuted = Color(nsColor: themedColor { palette, _ in palette.muted })
+    /// Text on a fill that uses `snapText`.
+    static let snapOnText = Color(nsColor: themedColor { palette, _ in palette.onText })
     static let snapTeal = Color(hex: 0x6FD3C2)
+    /// Text on the accent, which is bright in every theme.
     static let snapInk = Color(hex: 0x17181A)
 }
 
@@ -52,11 +59,6 @@ extension View {
     func snapCard(radius: CGFloat = 14) -> some View {
         background(Color.snapCard, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
     }
-
-    /// Applies the dark look and accent shared by every Snapframe window.
-    func snapWindowStyle() -> some View {
-        preferredColorScheme(.dark).tint(.snapAccent).foregroundStyle(Color.snapText)
-    }
 }
 
 struct BrandMark: View {
@@ -79,7 +81,7 @@ struct BrandMark: View {
             for segment in segments {
                 corners.addLines(segment.map { CGPoint(x: $0.x * unit, y: $0.y * unit) })
             }
-            context.stroke(corners, with: .color(.snapText), style: StrokeStyle(lineWidth: 1.8 * unit, lineCap: .round, lineJoin: .round))
+            context.stroke(corners, with: .color(Color(hex: 0xF4F3F0)), style: StrokeStyle(lineWidth: 1.8 * unit, lineCap: .round, lineJoin: .round))
             context.fill(Path(ellipseIn: CGRect(x: 11 * unit, y: 11 * unit, width: 12 * unit, height: 12 * unit)), with: .color(.snapAccent))
             context.fill(Path(ellipseIn: CGRect(x: 14.8 * unit, y: 14.8 * unit, width: 4.4 * unit, height: 4.4 * unit)), with: .color(Color(hex: 0x26282D)))
         }
@@ -100,7 +102,7 @@ struct KeyCaps: View {
                     .font(.system(size: fontSize, weight: .semibold))
                     .padding(.horizontal, 7)
                     .frame(minWidth: height * 0.75, minHeight: height)
-                    .background(Color(hex: 0x33353B), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .background(Color.snapLine, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                     .overlay(alignment: .bottom) {
                         RoundedRectangle(cornerRadius: 1).fill(Color.snapSidebar).frame(height: 2).padding(.horizontal, 3)
                     }
@@ -169,7 +171,7 @@ struct PillSegment<Value: Hashable>: View {
                     Text(option.title)
                         .font(.system(size: 13, weight: .medium))
                         .frame(maxWidth: .infinity, minHeight: 28)
-                        .foregroundStyle(selection == option.value ? Color.snapInk : Color.snapText)
+                        .foregroundStyle(selection == option.value ? (activeFill == .snapText ? Color.snapOnText : Color.snapInk) : Color.snapText)
                         .background(selection == option.value ? activeFill : Color.clear, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
                         .contentShape(Rectangle())
                 }
@@ -177,7 +179,7 @@ struct PillSegment<Value: Hashable>: View {
             }
         }
         .padding(3)
-        .background(Color(hex: 0x26282D), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+        .background(Color.snapControl, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
     }
 }
 
@@ -187,7 +189,7 @@ struct CaptureThumbnail: View {
 
     var body: some View {
         ZStack {
-            Color(hex: 0x26282D)
+            Color.snapControl
             if let image = library.thumbnail(for: item) {
                 Image(nsImage: image)
                     .resizable()

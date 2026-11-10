@@ -156,14 +156,14 @@ struct TextResultCard: View {
         .frame(width: 440, height: 320)
         .background(Color.snapSidebar)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color(hex: 0x36383E)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.snapLine))
         .snapWindowStyle()
         .onHover(perform: hovering)
     }
 
     private func codeRow(_ code: String) -> some View {
         HStack(spacing: 10) {
-            Image(systemName: "qrcode").font(.system(size: 18)).foregroundStyle(Color(hex: 0xFF8A63))
+            Image(systemName: "qrcode").font(.system(size: 18)).foregroundStyle(Color.snapAccentText)
             Text(code).font(.system(size: 13)).lineLimit(1).truncationMode(.middle)
             Spacer()
             Button("Copy") { copy(code) }.buttonStyle(QuietButtonStyle())

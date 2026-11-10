@@ -34,7 +34,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 6) {
                     ForEach(0...Self.lastStep, id: \.self) { index in
-                        Capsule().fill(index <= step ? Color.snapAccent : Color(hex: 0x33353B)).frame(height: 5)
+                        Capsule().fill(index <= step ? Color.snapAccent : Color.snapLine).frame(height: 5)
                     }
                 }
                 .padding(.bottom, 26)
@@ -101,7 +101,7 @@ struct OnboardingView: View {
     private func heading(_ title: String, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title).font(.snapDisplay(34)).fixedSize(horizontal: false, vertical: true)
-            Text(body).font(.system(size: 16)).foregroundStyle(Color(hex: 0xC4C6CC)).fixedSize(horizontal: false, vertical: true)
+            Text(body).font(.system(size: 16)).foregroundStyle(Color.snapSoft).fixedSize(horizontal: false, vertical: true)
         }
         .padding(.bottom, 22)
     }
@@ -117,7 +117,7 @@ struct OnboardingView: View {
 
     private func benefit(_ symbol: String, _ text: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 17)).foregroundStyle(Color(hex: 0xFF8A63)).frame(width: 24)
+            Image(systemName: symbol).font(.system(size: 17)).foregroundStyle(Color.snapAccentText).frame(width: 24)
             Text(text).font(.system(size: 14, weight: .medium))
             Spacer()
         }
@@ -135,7 +135,7 @@ struct OnboardingView: View {
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.snapInk)
                     .frame(width: 44, height: 44)
-                    .background(granted ? Color.snapTeal : Color(hex: 0xFF8A63), in: Circle())
+                    .background(granted ? Color.snapTeal : Color.snapAccentText, in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
                     Text(granted ? "Screen Recording is on" : "Screen Recording is off").font(.system(size: 14, weight: .semibold))
                     Text(granted ? "Snapframe can capture your screen." : "Turn on Snapframe in System Settings.").font(.system(size: 13)).foregroundStyle(Color.snapMuted)
@@ -202,7 +202,7 @@ struct OnboardingView: View {
             heading("You're ready", "Try your first capture. Snapframe will be waiting in the menu bar.")
             VStack(spacing: 12) {
                 KeyCaps(parts: settings.shortcuts[.area]?.keyParts ?? [], fontSize: 26, height: 54)
-                Text("Press this, then drag across your screen").font(.system(size: 14)).foregroundStyle(Color(hex: 0xC4C6CC))
+                Text("Press this, then drag across your screen").font(.system(size: 14)).foregroundStyle(Color.snapSoft)
             }
             .frame(maxWidth: .infinity)
             .padding(26)

@@ -131,7 +131,7 @@ enum PreviewStudio {
             edited.split(atTimeline: 4)
             edited.split(atTimeline: 6)
             edited.deleteClip(id: edited.clips[1].id)
-            edited.appearance.canvas.fill = .color(0xC9694A)
+            edited.appearance.canvas.fill = .linear([0xF2C14E, 0xF97316, 0xE11D48], angle: 45)
             edited.appearance.cursorStyle = .ring
             edited.appearance.cameraCorner = .topLeft
             let cut = directory.appendingPathComponent("edited.mp4")
@@ -258,6 +258,83 @@ enum PreviewStudio {
         } catch {
             print("studio: FAILED \(error)")
         }
+    }
+
+    /// Switches themes while a real editor window is open, then restores the previous theme.
+    @MainActor
+    static func themes(directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        ThemeEngine.shared.start()
+        let engine = ThemeEngine.shared
+        let (oldTheme, oldAccent) = (engine.theme, engine.accent)
+        defer {
+            engine.theme = oldTheme
+            engine.accent = oldAccent
+        }
+        let package = directory.appendingPathComponent("showcase.\(StudioProject.packageExtension)", isDirectory: true)
+        StudioController.shared.open(package: package)
+        guard let session = StudioController.shared.session else {
+            print("studio: editor did not open")
+            return
+        }
+        await wait(2)
+        session.tab = .canvas
+        session.seek(to: 3.4)
+        await wait(1)
+        for (theme, accent) in [(AppThemeID.daylight, ThemeAccent.teal), (.safelight, .safelight), (.aurora, .pink)] {
+            engine.theme = theme
+            engine.accent = accent
+            await wait(1)
+            await captureWindow("theme-\(theme.rawValue)", directory: directory)
+            print("theme: \(theme.rawValue) dark \(engine.isDark)")
+        }
+        session.project.appearance.canvas.fill = .linear([0x22D3EE, 0x3B82F6, 0x7C3AED], angle: 60)
+        session.changed()
+        await wait(1)
+        await captureWindow("theme-linear", directory: directory)
+    }
+
+    /// Exercises the real library against real files on disk.
+    @MainActor
+    static func libraryCheck(directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        let manager = FileManager.default
+        try? manager.removeItem(at: directory)
+        try? manager.createDirectory(at: directory, withIntermediateDirectories: true)
+        CaptureLibrary.overrideDirectory = directory.appendingPathComponent("library", isDirectory: true)
+        let library = CaptureLibrary.shared
+        guard let context = CGContext(data: nil, width: 64, height: 64, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue), let image = context.makeImage() else { return }
+        func file(_ name: String) -> URL {
+            let url = directory.appendingPathComponent(name)
+            manager.createFile(atPath: url.path, contents: Data([1]))
+            return url
+        }
+        func check(_ name: String, _ passed: Bool) { print("\(passed ? "ok" : "FAIL") \(name)") }
+
+        let image1 = file("photo.png"), video = file("clip.mp4"), kept = file("kept.png")
+        let photoItem = await library.add(image: image, scale: 1, kind: "Area", name: "photo", formatTitle: "PNG", savedURL: image1)
+        let videoItem = await library.add(image: image, scale: 1, kind: CaptureItem.recordingKind, name: "clip", formatTitle: "MP4", savedURL: video)
+        let keptItem = await library.add(image: image, scale: 1, kind: "Area", name: "kept", formatTitle: "PNG", savedURL: kept)
+        let clipboardItem = await library.add(image: image, scale: 1, kind: "Area", name: "clipboard", formatTitle: "PNG", savedURL: nil)
+        let driveItem = await library.add(image: image, scale: 1, kind: "Area", name: "drive", formatTitle: "PNG", savedURL: URL(fileURLWithPath: "/Volumes/SnapframeNotMounted/a.png"))
+        guard let photoItem, let videoItem, let keptItem, let clipboardItem, let driveItem else { return print("FAIL setup") }
+
+        await library.removeItemsWithDeletedFiles()
+        check("nothing removed while files exist", library.index.items.count == 5)
+
+        try? manager.removeItem(at: image1)
+        try? manager.trashItem(at: video, resultingItemURL: nil)
+        await library.removeItemsWithDeletedFiles()
+        let ids = Set(library.index.items.map(\.id))
+        check("deleted photo removed", !ids.contains(photoItem.id))
+        check("video moved to Trash removed", !ids.contains(videoItem.id))
+        check("private copy cleaned up", !manager.fileExists(atPath: library.imageURL(id: photoItem.id).path))
+        check("existing file kept", ids.contains(keptItem.id))
+        check("clipboard capture kept", ids.contains(clipboardItem.id))
+        check("unplugged drive kept", ids.contains(driveItem.id))
+
+        let reloaded = try? JSONDecoder().decode(LibraryIndex.self, from: Data(contentsOf: directory.appendingPathComponent("library/index.json")))
+        check("removal saved to disk", reloaded?.items.count == 3)
     }
 
     private static func wait(_ seconds: Double) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }

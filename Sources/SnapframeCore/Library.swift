@@ -44,6 +44,19 @@ public struct CaptureItem: Codable, Identifiable, Equatable, Sendable {
 }
 
 /// The library's contents, newest first. Files on disk are handled by the app layer.
+public enum SavedFile {
+    /// True only when a saved file is really gone. An unplugged drive or a blocked folder does not count.
+    public static func isDeleted(atPath path: String) -> Bool {
+        var info = stat()
+        guard stat(path, &info) != 0, errno == ENOENT || errno == ENOTDIR else { return false }
+        let parts = path.split(separator: "/")
+        if parts.count >= 2, parts[0] == "Volumes" {
+            return FileManager.default.fileExists(atPath: "/Volumes/\(parts[1])")
+        }
+        return true
+    }
+}
+
 public struct LibraryIndex: Codable, Equatable, Sendable {
     public var items: [CaptureItem]
 

@@ -17,6 +17,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var launchHint: PillPanel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        ThemeEngine.shared.start()
+        CaptureLibrary.shared.startWatchingDisk()
         let launchedAtLogin = NSAppleEventManager.shared().currentAppleEvent?
             .paramDescriptor(forKeyword: AEKeyword(keyAEPropData))?.enumCodeValue == OSType(keyAELaunchedAsLogInItem)
 
@@ -148,9 +150,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = title
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        window.appearance = NSAppearance(named: .darkAqua)
         window.isReleasedWhenClosed = false
-        window.backgroundColor = NSColor(srgbRed: 0.063, green: 0.067, blue: 0.075, alpha: 1)
+        window.backgroundColor = themedColor { palette, _ in palette.ground }
 
         let host = NSHostingView(rootView: content)
         host.sizingOptions = resizable ? [.minSize] : []

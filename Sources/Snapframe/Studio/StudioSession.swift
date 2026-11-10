@@ -35,7 +35,6 @@ final class StudioController: NSObject, NSWindowDelegate {
         window.title = project.name
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        window.appearance = NSAppearance(named: .darkAqua)
         window.isReleasedWhenClosed = false
         window.delegate = self
 

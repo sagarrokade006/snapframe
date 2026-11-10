@@ -89,7 +89,6 @@ final class AnnotateController: NSObject, NSWindowDelegate {
         window.title = "Annotate"
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        window.appearance = NSAppearance(named: .darkAqua)
         window.isReleasedWhenClosed = false
         window.delegate = self
 

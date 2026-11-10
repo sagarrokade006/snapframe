@@ -364,7 +364,7 @@ struct RecordingSetupView: View {
         .frame(width: 300, height: 392)
         .background(Color.snapSidebar)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color(hex: 0x36383E)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.snapLine))
         .snapWindowStyle()
     }
 
@@ -413,7 +413,7 @@ struct RecordingHUDView: View {
         .frame(width: 480, height: 64)
         .background(Color.snapSidebar)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color(hex: 0x36383E)))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.snapLine))
         .snapWindowStyle()
     }
 }

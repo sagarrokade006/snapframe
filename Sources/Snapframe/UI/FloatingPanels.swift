@@ -121,7 +121,7 @@ struct QuickAccessCard: View {
         .frame(width: 356, height: 312)
         .background(Color.snapSidebar)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color(hex: 0x36383E)))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.snapLine))
         .snapWindowStyle()
         .onHover(perform: hovering)
     }
@@ -194,7 +194,7 @@ private struct PinnedImageView: View {
                         Image(systemName: "xmark")
                             .font(.system(size: 11, weight: .bold))
                             .frame(width: 26, height: 26)
-                            .foregroundStyle(Color.snapText)
+                            .foregroundStyle(Color.white)
                             .background(Color.snapInk.opacity(0.85), in: Circle())
                     }
                     .buttonStyle(.plain)

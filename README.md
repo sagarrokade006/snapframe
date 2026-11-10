@@ -88,6 +88,15 @@
 | **Auto-delete** | Clear older library copies after a period you choose |
 | **Preview card** | Copy, edit, float or reveal a capture the moment you take it |
 | **Custom file names** | Build names from the date, time and capture type |
+| **Stays in step with Finder** | Delete a saved file and it leaves Home too |
+
+### Make it yours
+
+| Feature | What it does |
+|---|---|
+| **Themes** | System, Graphite, Daylight, Safelight, Deep Sea and Aurora |
+| **Accent colors** | Six accents that apply across the whole app |
+| **Backgrounds** | 48 solid colors and 30 gradients in Annotate and Studio, or make and save your own |
 
 ## Screenshots
 
@@ -103,6 +112,9 @@
   <tr>
     <td align="center"><img src="docs/screenshots/text-result.png" alt="Recognized text and a QR code"><br><sub><b>Text and QR codes</b></sub></td>
     <td align="center"><img src="docs/screenshots/update.png" alt="Update window with a changelog"><br><sub><b>In-app updates</b></sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="docs/screenshots/themes.png" width="640" alt="Appearance settings with six themes and accent colors"><br><sub><b>Themes and accents</b></sub></td>
   </tr>
 </table>
 

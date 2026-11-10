@@ -27,7 +27,6 @@ final class StatusMenuController: NSObject {
 
         popover.behavior = .transient
         popover.animates = false
-        popover.appearance = NSAppearance(named: .darkAqua)
         popover.contentViewController = NSHostingController(rootView: PopoverView(
             capture: { [weak self] action in
                 self?.popover.performClose(nil)
@@ -69,6 +68,7 @@ final class StatusMenuController: NSObject {
             popover.performClose(nil)
         } else {
             NSApp.activate(ignoringOtherApps: true)
+            Task { await CaptureLibrary.shared.removeItemsWithDeletedFiles() }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }
     }

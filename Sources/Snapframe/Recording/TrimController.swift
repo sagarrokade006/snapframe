@@ -28,7 +28,6 @@ final class TrimController: NSObject, NSWindowDelegate {
             backing: .buffered, defer: false
         )
         window.title = "Trim \(item.name)"
-        window.appearance = NSAppearance(named: .darkAqua)
         window.isReleasedWhenClosed = false
         window.contentView = playerView
         window.delegate = self

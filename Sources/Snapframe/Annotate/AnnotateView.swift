@@ -6,12 +6,6 @@ struct AnnotateView: View {
     @ObservedObject var session: AnnotateSession
     @State private var askingPassword = false
 
-    private static let backgrounds: [CanvasFill] = [
-        .none,
-        .color(0x5C8B94), .color(0x2A2C30), .color(0xC9694A), .color(0x6B7F4E), .color(0x6A4C74), .color(0xD8CDB8), .color(0xF4F3F0),
-        .gradient(0xFF8A63, 0xC7A6E8), .gradient(0x6FD3C2, 0x3D8BFF), .gradient(0xF2C14E, 0xFF6B3D), .gradient(0x2A2C30, 0x5C8B94),
-    ]
-
     var body: some View {
         VStack(spacing: 0) {
             topBar
@@ -91,7 +85,7 @@ struct AnnotateView: View {
     private var optionsBar: some View {
         HStack(spacing: 14) {
             Text(session.tool.title).font(.system(size: 13, weight: .semibold))
-            Text(session.tool.hint).font(.system(size: 13)).foregroundStyle(Color(hex: 0xC4C6CC)).lineLimit(1)
+            Text(session.tool.hint).font(.system(size: 13)).foregroundStyle(Color.snapSoft).lineLimit(1)
             Spacer()
             contextualControls
             if session.tool.usesLineWidth { widthControl }
@@ -135,7 +129,7 @@ struct AnnotateView: View {
                     Circle()
                         .fill(Color(hex: entry.hex))
                         .frame(width: 24, height: 24)
-                        .overlay(Circle().stroke(session.color == entry.hex ? Color.snapText : Color(hex: 0x55575E), lineWidth: 2))
+                        .overlay(Circle().stroke(session.color == entry.hex ? Color.snapText : Color.snapMuted, lineWidth: 2))
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
@@ -145,24 +139,15 @@ struct AnnotateView: View {
     }
 
     private var backgroundPanel: some View {
+        ScrollView {
         VStack(alignment: .leading, spacing: 18) {
             Text("Background").font(.system(size: 14, weight: .semibold))
 
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
-                ForEach(Array(Self.backgrounds.enumerated()), id: \.offset) { _, fill in
-                    Button {
-                        session.setFill(fill)
-                    } label: {
-                        swatch(fill)
-                            .frame(height: 44)
-                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(session.document.style.fill == fill ? Color.snapAccent : Color.snapLine, lineWidth: 2))
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(fill == .none ? "No background" : "Background")
-                }
-            }
+            BackgroundPicker(
+                fill: session.document.style.fill,
+                change: { session.document.style.fill = $0 },
+                commit: { session.commit() }
+            )
 
             sliderRow("Padding", value: $session.document.style.padding, range: 8...140, display: "\(Int(session.document.style.padding))")
             sliderRow("Corner radius", value: $session.document.style.cornerRadius, range: 0...40, display: "\(Int(session.document.style.cornerRadius))")
@@ -172,27 +157,12 @@ struct AnnotateView: View {
                 .buttonStyle(QuietButtonStyle())
                 .frame(maxWidth: .infinity)
 
-            Spacer()
         }
         .padding(18)
-        .frame(width: 262)
+        }
+        .frame(width: 310)
         .frame(maxHeight: .infinity)
         .background(Color.snapSidebar)
-    }
-
-    @ViewBuilder
-    private func swatch(_ fill: CanvasFill) -> some View {
-        switch fill {
-        case .none:
-            ZStack {
-                Color.snapRaised
-                Image(systemName: "slash.circle").foregroundStyle(Color.snapMuted)
-            }
-        case .color(let hex):
-            Color(hex: hex)
-        case .gradient(let start, let end):
-            LinearGradient(colors: [Color(hex: start), Color(hex: end)], startPoint: .topLeading, endPoint: .bottomTrailing)
-        }
     }
 
     private func sliderRow(_ title: String, value: Binding<CGFloat>, range: ClosedRange<CGFloat>, display: String) -> some View {
@@ -253,7 +223,7 @@ private struct PasswordSheet: View {
             SecureField("Password", text: $password).textFieldStyle(.roundedBorder)
             SecureField("Repeat password", text: $repeated).textFieldStyle(.roundedBorder)
             if !repeated.isEmpty && password != repeated {
-                Text("The passwords don't match.").font(.system(size: 13)).foregroundStyle(Color.snapAccent)
+                Text("The passwords don't match.").font(.system(size: 13)).foregroundStyle(Color.snapAccentText)
             }
             HStack {
                 Spacer()

@@ -134,7 +134,7 @@ final class AnnotationCanvasView: NSView, NSTextFieldDelegate {
         for handle in handles(for: rect) {
             let center = SelectionGeometry.point(of: handle, in: rect)
             let box = CGRect(x: center.x - 4.5, y: center.y - 4.5, width: 9, height: 9)
-            context.setFillColor(Palette.text.cgColor)
+            context.setFillColor(Palette.handle.cgColor)
             context.fill(box)
             context.setStrokeColor(Palette.accent.cgColor)
             context.setLineWidth(1.5)

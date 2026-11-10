@@ -142,4 +142,20 @@ final class ChipAndChangelogTests: XCTestCase {
     func testShortcutParts() {
         XCTAssertEqual(Shortcut(keyCode: 21, modifiers: [.control, .option]).keyParts, ["⌃", "⌥", "4"])
     }
+
+    func testSavedFileThatExistsIsNotDeleted() throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try Data([1]).write(to: file)
+        defer { try? FileManager.default.removeItem(at: file) }
+        XCTAssertFalse(SavedFile.isDeleted(atPath: file.path))
+    }
+
+    func testMissingSavedFileIsDeleted() {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        XCTAssertTrue(SavedFile.isDeleted(atPath: folder.appendingPathComponent("gone.png").path))
+    }
+
+    func testFileOnAnUnpluggedDriveIsNotDeleted() {
+        XCTAssertFalse(SavedFile.isDeleted(atPath: "/Volumes/SnapframeNotMounted/a.png"))
+    }
 }

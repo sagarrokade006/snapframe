@@ -15,6 +15,10 @@ final class CaptureLibrary: ObservableObject {
     private let directory: URL
     private let thumbnails = NSCache<NSUUID, NSImage>()
 
+    private var isCheckingDisk = false
+    private var diskWatch: Timer?
+    private var activationWatch: NSObjectProtocol?
+
     private var indexURL: URL { directory.appendingPathComponent("index.json") }
 
     private init() {
@@ -186,6 +190,40 @@ final class CaptureLibrary: ObservableObject {
         guard !removed.isEmpty else { return }
         removed.forEach(removeFiles)
         save()
+    }
+
+    /// Keeps Home in step with files deleted outside Snapframe, such as from Finder.
+    func startWatchingDisk() {
+        activationWatch = NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+            MainActor.assumeIsolated { Task { await CaptureLibrary.shared.removeItemsWithDeletedFiles() } }
+        }
+        diskWatch = Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { _ in
+            MainActor.assumeIsolated {
+                // Only needed while a window can show the library.
+                guard NSApp.windows.contains(where: { $0.isVisible && $0.styleMask.contains(.titled) }) else { return }
+                Task { await CaptureLibrary.shared.removeItemsWithDeletedFiles() }
+            }
+        }
+        Task { await removeItemsWithDeletedFiles() }
+    }
+
+    func removeItemsWithDeletedFiles() async {
+        guard !isCheckingDisk else { return }
+        isCheckingDisk = true
+        defer { isCheckingDisk = false }
+
+        func deleted(among paths: [(UUID, String)]) async -> [(UUID, String)] {
+            await Task.detached(priority: .utility) { paths.filter { SavedFile.isDeleted(atPath: $0.1) } }.value
+        }
+        var missing = await deleted(among: index.items.compactMap { item in item.savedPath.map { (item.id, $0) } })
+        guard !missing.isEmpty else { return }
+
+        // Saving and trimming replace files, so a file must stay missing for a moment to count.
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        missing = await deleted(among: missing)
+        for (id, path) in missing {
+            if let item = index.items.first(where: { $0.id == id }), item.savedPath == path { delete(item) }
+        }
     }
 
     private func removeFiles(of item: CaptureItem) {

@@ -238,7 +238,7 @@ private struct ClipBlock: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6).fill(Color(hex: 0x3A4C52))
+            RoundedRectangle(cornerRadius: 6).fill(Color(hex: 0x5C8B94).opacity(0.55))
             RoundedRectangle(cornerRadius: 6).stroke(isSelected ? Color.snapAccent : Color.clear, lineWidth: 2)
             HStack {
                 handle { delta, base in session.project.trimClip(id: clip.id, start: base.start + delta) }
@@ -338,11 +338,6 @@ private struct ZoomBlock: View {
 private struct StudioInspector: View {
     @ObservedObject var session: StudioSession
 
-    private static let backgrounds: [CanvasFill] = [
-        .none, .color(0x5C8B94), .color(0x2A2C30), .color(0xC9694A), .color(0x6B7F4E), .color(0x6A4C74), .color(0xD8CDB8), .color(0xF4F3F0),
-        .gradient(0xFF8A63, 0xC7A6E8), .gradient(0x6FD3C2, 0x3D8BFF), .gradient(0xF2C14E, 0xFF6B3D), .gradient(0x2A2C30, 0x5C8B94),
-    ]
-
     private func binding<T>(_ path: WritableKeyPath<StudioAppearance, T>) -> Binding<T> {
         Binding(
             get: { session.project.appearance[keyPath: path] },
@@ -410,7 +405,7 @@ private struct StudioInspector: View {
                         Text(item.rawValue)
                             .font(.system(size: 13, weight: .medium))
                             .frame(maxWidth: .infinity, minHeight: 34)
-                            .foregroundStyle(session.tab == item ? Color.snapInk : Color.snapText)
+                            .foregroundStyle(session.tab == item ? Color.snapOnText : Color.snapText)
                             .background(session.tab == item ? Color.snapText : Color.snapRaised, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                             .contentShape(Rectangle())
                     }
@@ -523,40 +518,17 @@ private struct StudioInspector: View {
     @ViewBuilder
     private var canvasPane: some View {
         Text("Background").font(.system(size: 14, weight: .semibold))
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
-            ForEach(Array(Self.backgrounds.enumerated()), id: \.offset) { _, fill in
-                Button {
-                    session.project.appearance.canvas.fill = fill
-                    session.changed()
-                } label: {
-                    swatch(fill)
-                        .frame(height: 44)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).stroke(session.project.appearance.canvas.fill == fill ? Color.snapAccent : Color.snapLine, lineWidth: 2))
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(fill == .none ? "No background" : "Background")
-            }
-        }
+        BackgroundPicker(
+            fill: session.project.appearance.canvas.fill,
+            change: {
+                session.project.appearance.canvas.fill = $0
+                session.liveChange()
+            },
+            commit: { session.commit() }
+        )
         canvasSlider("Padding", \.padding, range: 8...140)
         canvasSlider("Corner radius", \.cornerRadius, range: 0...40)
         canvasSlider("Shadow", \.shadow, range: 0...1, percent: true)
-    }
-
-    @ViewBuilder
-    private func swatch(_ fill: CanvasFill) -> some View {
-        switch fill {
-        case .none:
-            ZStack {
-                Color.snapRaised
-                Image(systemName: "slash.circle").foregroundStyle(Color.snapMuted)
-            }
-        case .color(let hex):
-            Color(hex: hex)
-        case .gradient(let start, let end):
-            LinearGradient(colors: [Color(hex: start), Color(hex: end)], startPoint: .topLeading, endPoint: .bottomTrailing)
-        }
     }
 
     @ViewBuilder

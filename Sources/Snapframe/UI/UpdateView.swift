@@ -129,7 +129,7 @@ struct UpdateView: View {
             ForEach(Array(stages.enumerated()), id: \.offset) { index, label in
                 HStack(spacing: 12) {
                     ZStack {
-                        Circle().fill(index < current ? Color.snapTeal : (index == current ? Color.snapAccent : Color(hex: 0x33353B)))
+                        Circle().fill(index < current ? Color.snapTeal : (index == current ? Color.snapAccent : Color.snapLine))
                         if index < current {
                             Image(systemName: "checkmark").font(.system(size: 12, weight: .bold)).foregroundStyle(Color.snapInk)
                         } else if index == current {
@@ -150,7 +150,7 @@ struct UpdateView: View {
         VStack(spacing: 12) {
             switch updates.phase {
             case .failed(let message):
-                Image(systemName: "exclamationmark.triangle").font(.system(size: 30)).foregroundStyle(Color.snapAccent)
+                Image(systemName: "exclamationmark.triangle").font(.system(size: 30)).foregroundStyle(Color.snapAccentText)
                 Text(message).font(.system(size: 14)).multilineTextAlignment(.center)
             case .upToDate:
                 Image(systemName: "checkmark.circle").font(.system(size: 34)).foregroundStyle(Color.snapTeal)

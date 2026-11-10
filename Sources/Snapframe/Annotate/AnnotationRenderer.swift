@@ -93,6 +93,18 @@ final class AnnotationRenderer {
             context.clip(to: rect)
             context.drawLinearGradient(gradient, start: CGPoint(x: rect.minX, y: rect.minY), end: CGPoint(x: rect.maxX, y: rect.maxY), options: [])
             context.restoreGState()
+        case .linear(let stops, let angle):
+            guard stops.count >= 2, let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: stops.map { snapCGColor($0) } as CFArray, locations: nil) else { return }
+            let line = CanvasFill.gradientLine(angle: angle, size: rect.size)
+            context.saveGState()
+            context.clip(to: rect)
+            context.drawLinearGradient(
+                gradient,
+                start: CGPoint(x: rect.minX + line.start.x, y: rect.minY + line.start.y),
+                end: CGPoint(x: rect.minX + line.end.x, y: rect.minY + line.end.y),
+                options: [.drawsBeforeStartLocation, .drawsAfterEndLocation]
+            )
+            context.restoreGState()
         }
     }
 

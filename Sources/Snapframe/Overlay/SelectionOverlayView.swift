@@ -2,13 +2,18 @@ import AppKit
 import SnapframeCore
 
 enum Palette {
-    static let accent = NSColor(srgbRed: 1, green: 0.42, blue: 0.24, alpha: 1)
-    static let panel = NSColor(srgbRed: 0.09, green: 0.094, blue: 0.106, alpha: 1)
-    static let control = NSColor(srgbRed: 0.149, green: 0.157, blue: 0.176, alpha: 1)
-    static let hairline = NSColor(srgbRed: 0.212, green: 0.22, blue: 0.243, alpha: 1)
-    static let text = NSColor(srgbRed: 0.957, green: 0.953, blue: 0.941, alpha: 1)
-    static let secondary = NSColor(srgbRed: 0.659, green: 0.671, blue: 0.702, alpha: 1)
+    private static var theme: ThemePalette { ThemeStore.current.palette }
+
+    static var accent: NSColor { NSColor(snapHex: ThemeStore.current.accent) }
+    static var panel: NSColor { NSColor(snapHex: theme.sidebar) }
+    static var control: NSColor { NSColor(snapHex: theme.control) }
+    static var hairline: NSColor { NSColor(snapHex: theme.line) }
+    static var text: NSColor { NSColor(snapHex: theme.text) }
+    static var secondary: NSColor { NSColor(snapHex: theme.muted) }
+    static var onText: NSColor { NSColor(snapHex: theme.onText) }
     static let onAccent = NSColor(srgbRed: 0.09, green: 0.094, blue: 0.102, alpha: 1)
+    /// Selection handles sit on top of any screen content, so they stay light in every theme.
+    static let handle = NSColor(srgbRed: 0.957, green: 0.953, blue: 0.941, alpha: 1)
     static let dim = NSColor(srgbRed: 0.04, green: 0.043, blue: 0.051, alpha: 0.62)
 }
 
@@ -203,7 +208,7 @@ final class SelectionOverlayView: NSView {
             let center = SelectionGeometry.point(of: handle, in: rect)
             let box = CGRect(x: center.x - 5, y: center.y - 5, width: 10, height: 10)
             let shape = NSBezierPath(roundedRect: box, xRadius: 3, yRadius: 3)
-            Palette.text.setFill()
+            Palette.handle.setFill()
             shape.fill()
             Palette.accent.setStroke()
             shape.lineWidth = 2
@@ -482,7 +487,7 @@ final class SelectionOverlayView: NSView {
         let foreground: NSColor
         switch (item.style, item.selected) {
         case (.mode, true): (fill, foreground) = (Palette.accent, Palette.onAccent)
-        case (_, true): (fill, foreground) = (Palette.text, Palette.onAccent)
+        case (_, true): (fill, foreground) = (Palette.text, Palette.onText)
         default: (fill, foreground) = (Palette.control, Palette.text)
         }
 

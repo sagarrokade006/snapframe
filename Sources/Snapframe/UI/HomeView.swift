@@ -147,7 +147,7 @@ struct HomeView: View {
                     Text("Version \(UpdateService.currentVersion.description)").font(.system(size: 13, weight: .medium))
                     Spacer()
                     if updates.availableVersion != nil {
-                        Text("Update").font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.snapAccent)
+                        Text("Update").font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.snapAccentText)
                     } else if updates.phase == .upToDate {
                         Text("Up to date").font(.system(size: 12)).foregroundStyle(Color.snapTeal)
                     }
@@ -282,7 +282,7 @@ struct HomeView: View {
         } label: {
             Text(title)
                 .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(kind == value ? Color.snapInk : Color.snapText)
+                .foregroundStyle(kind == value ? Color.snapOnText : Color.snapText)
                 .padding(.horizontal, 12)
                 .frame(height: 28)
                 .background(kind == value ? Color.snapText : Color.snapCard, in: Capsule())
@@ -298,7 +298,7 @@ struct HomeView: View {
             VStack(spacing: 0) {
                 CaptureThumbnail(item: item).frame(height: 132).clipped()
                 HStack(spacing: 8) {
-                    if item.isPinned { Image(systemName: "pin.fill").font(.system(size: 10)).foregroundStyle(Color.snapAccent) }
+                    if item.isPinned { Image(systemName: "pin.fill").font(.system(size: 10)).foregroundStyle(Color.snapAccentText) }
                     Text(item.name).font(.system(size: 13, weight: .medium)).lineLimit(1)
                     Spacer()
                     Text(CaptureFormatting.when(item.createdAt)).font(.system(size: 12)).foregroundStyle(Color.snapMuted)
@@ -437,7 +437,7 @@ struct CaptureInspector: View {
                         .font(.system(size: 12))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .overlay(Capsule().stroke(Color(hex: 0x5A5D65), style: StrokeStyle(lineWidth: 1, dash: [3])))
+                        .overlay(Capsule().stroke(Color.snapMuted, style: StrokeStyle(lineWidth: 1, dash: [3])))
                 }
             }
 
@@ -484,7 +484,7 @@ struct CaptureInspector: View {
         .font(.system(size: 13))
         .frame(height: 36)
         .overlay(alignment: .bottom) {
-            if divider { Rectangle().fill(Color(hex: 0x2C2E33)).frame(height: 1) }
+            if divider { Rectangle().fill(Color.snapRaised).frame(height: 1) }
         }
     }
 

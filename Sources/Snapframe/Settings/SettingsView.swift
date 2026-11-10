@@ -5,6 +5,7 @@ import SwiftUI
 
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general = "General"
+    case appearance = "Appearance"
     case capture = "Capture"
     case recording = "Recording"
     case files = "Files"
@@ -17,6 +18,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .general: return "gearshape.fill"
+        case .appearance: return "paintpalette.fill"
         case .capture: return "viewfinder"
         case .recording: return "record.circle.fill"
         case .files: return "doc.fill"
@@ -29,6 +31,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
     var tile: Color {
         switch self {
         case .general: return Color(hex: 0xFF8A63)
+        case .appearance: return Color(hex: 0x6FD3C2)
         case .capture: return .snapTeal
         case .recording: return Color(hex: 0xFF6B6B)
         case .files: return Color(hex: 0xF2C14E)
@@ -41,6 +44,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
     var intro: String {
         switch self {
         case .general: return "How Snapframe starts and responds."
+        case .appearance: return "Choose how every Snapframe window looks."
         case .capture: return "What happens while you select."
         case .recording: return "Defaults for video and GIF capture."
         case .files: return "How captures are named and saved."
@@ -92,6 +96,7 @@ struct SettingsView: View {
                     }
                     switch pane {
                     case .general: GeneralPane()
+                    case .appearance: AppearancePane()
                     case .capture: CapturePane()
                     case .recording: RecordingPane()
                     case .files: FilesPane()
@@ -195,6 +200,91 @@ private struct ChoiceMenu<Value: Hashable>: View {
 }
 
 // MARK: Panes
+
+private struct AppearancePane: View {
+    @ObservedObject private var engine = ThemeEngine.shared
+
+    private func miniature(_ palette: ThemePalette) -> some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 4).fill(Color(hex: palette.sidebar)).frame(width: 34)
+            VStack(alignment: .leading, spacing: 5) {
+                Capsule().fill(Color(hex: palette.text)).frame(width: 50, height: 5)
+                RoundedRectangle(cornerRadius: 4).fill(Color(hex: palette.card))
+                Capsule().fill(Color(hex: engine.accent.hex)).frame(width: 30, height: 8)
+            }
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(hex: palette.ground))
+    }
+
+    @ViewBuilder
+    private func preview(_ theme: AppThemeID) -> some View {
+        if theme == .system {
+            ZStack {
+                miniature(.graphite)
+                miniature(.daylight).mask(GeometryReader { box in
+                    Rectangle().frame(width: box.size.width / 2).offset(x: box.size.width / 2)
+                })
+            }
+        } else {
+            miniature(theme.palette(systemIsDark: true))
+        }
+    }
+
+    var body: some View {
+        SettingsGroup(title: "Theme") {
+            VStack(alignment: .leading, spacing: 10) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                    ForEach(AppThemeID.allCases, id: \.self) { theme in
+                        Button {
+                            engine.theme = theme
+                        } label: {
+                            VStack(spacing: 6) {
+                                preview(theme)
+                                    .frame(height: 96)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .stroke(engine.theme == theme ? Color.snapAccentText : Color.snapLine, lineWidth: engine.theme == theme ? 2 : 1)
+                                    )
+                                Text(theme.title).font(.system(size: 13, weight: .medium))
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(engine.theme == theme ? .isSelected : [])
+                    }
+                }
+                Text(engine.theme.detail).font(.system(size: 13)).foregroundStyle(Color.snapMuted)
+            }
+            .padding(14)
+        }
+        SettingsGroup(title: "Accent") {
+            HStack(spacing: 12) {
+                ForEach(ThemeAccent.allCases, id: \.self) { accent in
+                    Button {
+                        engine.accent = accent
+                    } label: {
+                        Circle()
+                            .fill(Color(hex: accent.hex))
+                            .frame(width: 34, height: 34)
+                            .overlay(Circle().stroke(Color.snapText, lineWidth: engine.accent == accent ? 2 : 0).padding(-4))
+                            .padding(4)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(accent.title)
+                    .accessibilityAddTraits(engine.accent == accent ? .isSelected : [])
+                    .help(accent.title)
+                }
+                Spacer()
+                Text(engine.accent.title).font(.system(size: 13)).foregroundStyle(Color.snapMuted)
+            }
+            .padding(14)
+        }
+    }
+}
 
 private struct GeneralPane: View {
     @ObservedObject private var settings = AppSettings.shared
@@ -357,7 +447,7 @@ private struct FilesPane: View {
                             .font(.system(size: 13))
                             .padding(.horizontal, 10)
                             .frame(height: 28)
-                            .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Color(hex: 0x3F4148)))
+                            .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).stroke(Color.snapLine))
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -375,7 +465,7 @@ private struct FilesPane: View {
             }
 
             HStack(spacing: 10) {
-                Image(systemName: "doc").foregroundStyle(Color(hex: 0xFF8A63))
+                Image(systemName: "doc").foregroundStyle(Color.snapAccentText)
                 Text(preview).font(.system(size: 13, weight: .medium)).lineLimit(1).truncationMode(.middle)
                 Spacer()
             }
@@ -504,16 +594,16 @@ private struct ShortcutCard: View {
             recording ? stop() : start()
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: action.symbol).font(.system(size: 20)).foregroundStyle(Color(hex: 0xFF8A63)).frame(width: 26)
+                Image(systemName: action.symbol).font(.system(size: 20)).foregroundStyle(Color.snapAccentText).frame(width: 26)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(action.title).font(.system(size: 14, weight: .medium))
                     if let warning {
-                        Text(warning).font(.system(size: 12)).foregroundStyle(Color.snapAccent)
+                        Text(warning).font(.system(size: 12)).foregroundStyle(Color.snapAccentText)
                     }
                 }
                 Spacer()
                 if recording {
-                    Text("Press keys…").font(.system(size: 13, weight: .medium)).foregroundStyle(Color.snapAccent)
+                    Text("Press keys…").font(.system(size: 13, weight: .medium)).foregroundStyle(Color.snapAccentText)
                 } else if let shortcut = settings.shortcuts[action] {
                     KeyCaps(parts: shortcut.keyParts)
                 } else {
@@ -594,7 +684,7 @@ private struct UpdatesPane: View {
                     .disabled(!updates.isConfigured)
             }
             SettingRow(title: "Last checked", detail: "From GitHub Releases") {
-                Text(lastChecked).font(.system(size: 13)).foregroundStyle(Color(hex: 0xC4C6CC))
+                Text(lastChecked).font(.system(size: 13)).foregroundStyle(Color.snapSoft)
             }
         }
         SettingsGroup(title: "Automatic updates") {
@@ -629,7 +719,7 @@ private struct AboutPane: View {
 
     private func info(_ title: String, _ detail: String, _ value: String) -> some View {
         SettingRow(title: title, detail: detail) {
-            Text(value).font(.system(size: 13)).foregroundStyle(Color(hex: 0xC4C6CC))
+            Text(value).font(.system(size: 13)).foregroundStyle(Color.snapSoft)
         }
     }
 }

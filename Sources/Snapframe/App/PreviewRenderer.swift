@@ -12,6 +12,7 @@ enum PreviewRenderer {
     private static let scale: CGFloat = 2
 
     static func run(into directory: URL) async {
+        ThemeEngine.shared.start()
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let sampleLibrary = directory.appendingPathComponent("library", isDirectory: true)
         try? FileManager.default.removeItem(at: sampleLibrary)
@@ -94,7 +95,7 @@ enum PreviewRenderer {
             writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
         }
         let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
-        let release = AvailableRelease(version: AppVersion("1.6.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        let release = AvailableRelease(version: AppVersion("1.7.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
         UpdateController.shared.previewAvailable(release, phase: .available)
         writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
         UpdateController.shared.previewAvailable(release, phase: .installing)
@@ -165,7 +166,7 @@ enum PreviewRenderer {
         let host = NSHostingView(rootView: root)
         host.frame = CGRect(origin: .zero, size: viewSize)
         let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
-        window.appearance = NSAppearance(named: .darkAqua)
+        window.appearance = NSAppearance(named: ThemeEngine.shared.isDark ? .darkAqua : .aqua)
         window.contentView = host
         host.layoutSubtreeIfNeeded()
         RunLoop.main.run(until: Date().addingTimeInterval(0.3))
