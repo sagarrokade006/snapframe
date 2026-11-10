@@ -74,6 +74,7 @@ struct HomeView: View {
                     tag = nil
                 }
             }
+            navigationRow("Annotate Image…", "pencil.tip.crop.circle", count: nil, active: false) { AnnotateController.shared.chooseFile() }
             navigationRow("Settings", "slider.horizontal.3", count: nil, active: false, action: onSettings)
 
             if !library.index.allTags.isEmpty {
@@ -374,8 +375,9 @@ struct CaptureInspector: View {
 
             HStack(spacing: 6) {
                 IconAction(title: "Copy", symbol: "doc.on.doc", primary: true) { library.copy(item) }
-                IconAction(title: "Open", symbol: "arrow.up.forward.app") { library.open(item) }
+                IconAction(title: "Edit", symbol: "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
                 IconAction(title: "Float", symbol: "pip") { PinController.shared.pin(item) }
+                IconAction(title: "Share", symbol: "square.and.arrow.up") { ShareSheet.show(library.imageURL(id: item.id)) }
                 IconAction(title: "Reveal", symbol: "folder") { library.reveal(item) }
             }
 
@@ -455,7 +457,7 @@ struct CaptureInspector: View {
     }
 
     private func savedLocation(_ item: CaptureItem) -> String {
-        guard let path = item.savedPath else { return "Clipboard" }
+        guard let path = item.savedPath else { return "Library only" }
         return URL(fileURLWithPath: path).deletingLastPathComponent().lastPathComponent
     }
 

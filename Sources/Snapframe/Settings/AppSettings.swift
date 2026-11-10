@@ -42,6 +42,14 @@ final class AppSettings: ObservableObject {
         set { defaults.set(newValue.rawValue, forKey: "lastOverlayMode") }
     }
 
+    var defaultCanvasStyle: CanvasStyle {
+        get {
+            guard let data = defaults.data(forKey: "defaultCanvasStyle") else { return CanvasStyle() }
+            return (try? JSONDecoder().decode(CanvasStyle.self, from: data)) ?? CanvasStyle()
+        }
+        set { defaults.set(try? JSONEncoder().encode(newValue), forKey: "defaultCanvasStyle") }
+    }
+
     var previousArea: PreviousArea? {
         get {
             guard let data = defaults.data(forKey: "previousArea") else { return nil }

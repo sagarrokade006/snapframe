@@ -30,6 +30,7 @@ final class CaptureLibrary: ObservableObject {
 
     func imageURL(id: UUID) -> URL { directory.appendingPathComponent("\(id.uuidString).png") }
     private func thumbnailURL(id: UUID) -> URL { directory.appendingPathComponent("\(id.uuidString).jpg") }
+    func projectURL(id: UUID) -> URL { directory.appendingPathComponent("\(id.uuidString).snapframe") }
 
     @discardableResult
     func add(
@@ -69,6 +70,42 @@ final class CaptureLibrary: ObservableObject {
         selectedID = item.id
         save()
         return item
+    }
+
+    /// Replaces a capture with its edited version, so redacted pixels leave the library.
+    func storeEdit(_ image: CGImage, scale: CGFloat, projectData: Data, itemID: UUID?) async {
+        guard let itemID, let position = index.items.firstIndex(where: { $0.id == itemID }) else {
+            if let item = await add(image: image, scale: scale, kind: "Edited", name: "Edited capture", formatTitle: "PNG", savedURL: nil) {
+                try? projectData.write(to: projectURL(id: item.id), options: .atomic)
+            }
+            return
+        }
+
+        let imageDestination = imageURL(id: itemID)
+        let thumbnailDestination = thumbnailURL(id: itemID)
+        let projectDestination = projectURL(id: itemID)
+        let pngSize: Int? = await Task.detached(priority: .userInitiated) {
+            guard let png = try? OutputService.encode(image, format: .png, quality: 1, scale: scale),
+                  (try? png.write(to: imageDestination, options: .atomic)) != nil
+            else { return nil }
+            let ratio = CGFloat(image.width) / 640
+            let small = ratio > 1 ? OutputService.downscaled(image, by: ratio) : image
+            if let jpeg = try? OutputService.encode(small, format: .jpeg, quality: 0.85, scale: 1) {
+                try? jpeg.write(to: thumbnailDestination, options: .atomic)
+            }
+            try? projectData.write(to: projectDestination, options: .atomic)
+            return png.count
+        }.value
+        guard let pngSize else { return }
+
+        thumbnails.removeObject(forKey: itemID as NSUUID)
+        index.items[position].pixelWidth = image.width
+        index.items[position].pixelHeight = image.height
+        index.items[position].byteCount = pngSize
+        index.items[position].formatTitle = "PNG"
+        index.items[position].savedPath = nil
+        selectedID = itemID
+        save()
     }
 
     func thumbnail(for item: CaptureItem) -> NSImage? {
@@ -134,6 +171,7 @@ final class CaptureLibrary: ObservableObject {
     private func removeFiles(of item: CaptureItem) {
         try? FileManager.default.removeItem(at: imageURL(id: item.id))
         try? FileManager.default.removeItem(at: thumbnailURL(id: item.id))
+        try? FileManager.default.removeItem(at: projectURL(id: item.id))
         thumbnails.removeObject(forKey: item.id as NSUUID)
     }
 

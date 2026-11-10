@@ -22,13 +22,14 @@ public enum ImageFormat: String, CaseIterable, Codable, Sendable {
 }
 
 public enum AfterCapture: String, CaseIterable, Codable, Sendable {
-    case saveAndCopy, save, copy
+    case saveAndCopy, save, copy, annotate
 
     public var title: String {
         switch self {
         case .saveAndCopy: return "Save and copy"
         case .save: return "Save to folder"
         case .copy: return "Copy to clipboard"
+        case .annotate: return "Open in editor"
         }
     }
 
@@ -37,9 +38,10 @@ public enum AfterCapture: String, CaseIterable, Codable, Sendable {
         case .saveAndCopy: return "Save + Copy"
         case .save: return "Save"
         case .copy: return "Copy"
+        case .annotate: return "Edit"
         }
     }
 
-    public var saves: Bool { self != .copy }
-    public var copies: Bool { self != .save }
+    public var saves: Bool { self == .saveAndCopy || self == .save }
+    public var copies: Bool { self == .saveAndCopy || self == .copy }
 }

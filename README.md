@@ -10,6 +10,8 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 
 ![Snapframe Home window with capture tiles and recent captures](docs/screenshots/home.png)
 
+![Annotate editor with markup tools and a background](docs/screenshots/annotate.png)
+
 ![Capture overlay with selection, aspect ratios and after-capture choices](docs/screenshots/overlay.png)
 
 | Menu bar | Software update |
@@ -26,6 +28,8 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 - Aspect ratios, freeze screen, edge snapping and a loupe with color readout
 - A private library with search, tags, pinning and auto-delete
 - A preview card after every capture, and floating images that stay on top
+- An Annotate editor with arrows, shapes, text, counters, spotlight, redaction and backgrounds
+- Editable projects, password-protected PDFs and the macOS share sheet
 - Custom file names, PNG, JPEG or HEIC, and global shortcuts
 - In-app updates with a changelog
 

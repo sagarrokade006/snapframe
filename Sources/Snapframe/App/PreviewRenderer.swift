@@ -94,11 +94,22 @@ enum PreviewRenderer {
             writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
         }
         let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
-        let release = AvailableRelease(version: AppVersion("1.2.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        let release = AvailableRelease(version: AppVersion("1.3.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
         UpdateController.shared.previewAvailable(release, phase: .available)
         writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
         UpdateController.shared.previewAvailable(release, phase: .installing)
         writeHosted(UpdateView(close: {}), "41-update-installing", CGSize(width: 720, height: 620), directory)
+
+        let editor = PreviewAnnotate.sampleSession(base: snapshot.image, scale: scale)
+        writeHosted(AnnotateView(session: editor), "50-annotate", size, directory)
+        editor.tool = .redact
+        writeHosted(AnnotateView(session: editor), "51-annotate-redact", size, directory)
+        if let flat = editor.renderer.flatten(editor.document), let png = try? OutputService.encode(flat, format: .png, quality: 1, scale: scale) {
+            try? png.write(to: directory.appendingPathComponent("52-annotate-flat.png"))
+        }
+        PreviewAnnotate.checkBurning(base: snapshot.image, scale: scale)
+        await PreviewAnnotate.checkStoredEdit(base: snapshot.image, scale: scale)
+        PreviewAnnotate.checkCanvas(base: snapshot.image, scale: scale)
 
         await checkOutput(snapshot: snapshot, directory: directory)
     }

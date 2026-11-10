@@ -96,7 +96,7 @@ struct QuickAccessCard: View {
 
             HStack(spacing: 4) {
                 quick("Copy", "doc.on.doc") { library.copy(item) }
-                quick("Open", "arrow.up.forward.app") { library.open(item) }
+                quick("Edit", "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
                 quick("Float", "pip") { PinController.shared.pin(item) }
                 quick("Reveal", "folder") { library.reveal(item) }
                 quick("Close", "xmark") {}
@@ -138,9 +138,12 @@ final class PinController {
 
     func pin(_ item: CaptureItem) {
         guard let image = NSImage(contentsOf: CaptureLibrary.shared.imageURL(id: item.id)) else { return }
-
         let scale = max(item.scale, 1)
-        var size = CGSize(width: Double(item.pixelWidth) / scale, height: Double(item.pixelHeight) / scale)
+        pin(image: image, pointSize: CGSize(width: Double(item.pixelWidth) / scale, height: Double(item.pixelHeight) / scale))
+    }
+
+    func pin(image: NSImage, pointSize: CGSize) {
+        var size = pointSize
         let limit = min(720 / size.width, 520 / size.height, 1)
         size = CGSize(width: size.width * limit, height: size.height * limit)
 

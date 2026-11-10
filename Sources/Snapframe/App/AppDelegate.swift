@@ -48,6 +48,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func application(_ application: NSApplication, open urls: [URL]) {
+        urls.forEach { AnnotateController.shared.open(fileURL: $0) }
+    }
+
     /// A menu-bar app has no Dock window, so opening it again brings up Home.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if settings.onboardingCompleted && PermissionManager.isScreenRecordingGranted {

@@ -163,7 +163,9 @@ final class CaptureCoordinator {
             message = "Copied to clipboard"
         }
 
-        if let item {
+        if let item, settings.afterCapture == .annotate, !copyOnly {
+            AnnotateController.shared.open(item)
+        } else if let item {
             QuickAccessController.shared.show(item, message: message)
         } else {
             showToast(message, reveal: result.savedURL)
