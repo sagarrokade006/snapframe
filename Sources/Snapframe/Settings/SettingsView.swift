@@ -6,6 +6,7 @@ import SwiftUI
 enum SettingsPane: String, CaseIterable, Identifiable {
     case general = "General"
     case capture = "Capture"
+    case recording = "Recording"
     case files = "Files"
     case shortcuts = "Shortcuts"
     case updates = "Updates"
@@ -17,6 +18,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .general: return "gearshape.fill"
         case .capture: return "viewfinder"
+        case .recording: return "record.circle.fill"
         case .files: return "doc.fill"
         case .shortcuts: return "keyboard.fill"
         case .updates: return "arrow.triangle.2.circlepath"
@@ -28,6 +30,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .general: return Color(hex: 0xFF8A63)
         case .capture: return .snapTeal
+        case .recording: return Color(hex: 0xFF6B6B)
         case .files: return Color(hex: 0xF2C14E)
         case .shortcuts: return Color(hex: 0x8FB7D9)
         case .updates: return Color(hex: 0xC7A6E8)
@@ -39,6 +42,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
         switch self {
         case .general: return "How Snapframe starts and responds."
         case .capture: return "What happens while you select."
+        case .recording: return "Defaults for video and GIF capture."
         case .files: return "How captures are named and saved."
         case .shortcuts: return "Click any shortcut, then press the new keys."
         case .updates: return "New versions arrive from GitHub."
@@ -89,6 +93,7 @@ struct SettingsView: View {
                     switch pane {
                     case .general: GeneralPane()
                     case .capture: CapturePane()
+                    case .recording: RecordingPane()
                     case .files: FilesPane()
                     case .shortcuts: ShortcutsPane()
                     case .updates: UpdatesPane()
@@ -269,6 +274,26 @@ private struct CapturePane: View {
                     }
                 ))
             }
+        }
+    }
+}
+
+private struct RecordingPane: View {
+    @ObservedObject private var settings = AppSettings.shared
+
+    var body: some View {
+        SettingsGroup(title: "Quality") {
+            SettingRow(title: "Frame rate", detail: "Higher is smoother, with larger files") {
+                ChoiceMenu(options: [(60, "60 fps"), (30, "30 fps"), (24, "24 fps")], selection: $settings.recordFramesPerSecond)
+            }
+            SettingRow(title: "Maximum resolution", detail: "Limits the height of the video") {
+                ChoiceMenu(options: [(0, "Native"), (1440, "1440p"), (1080, "1080p"), (720, "720p")], selection: $settings.recordMaximumHeight)
+            }
+        }
+        SettingsGroup(title: "While recording") {
+            ToggleRow(title: "Show time in menu bar", detail: "Click the menu bar icon to stop", isOn: $settings.showRecordingTime)
+            ToggleRow(title: "Highlight clicks", detail: "Draws a ripple where you click", isOn: $settings.recordClicks)
+            ToggleRow(title: "Show shortcuts pressed", detail: "Needs Accessibility. Ordinary typing is never shown", isOn: $settings.recordKeystrokes)
         }
     }
 }

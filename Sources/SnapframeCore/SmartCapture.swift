@@ -252,6 +252,7 @@ public enum AutomationCommand: Equatable, Sendable {
         case "all-in-one": return .capture(.allInOne)
         case "scrolling-capture": return .capture(.scrolling)
         case "capture-text": return .capture(.text)
+        case "record-screen": return .capture(.record)
         case "toggle-desktop-icons": return .icons(.toggle)
         case "hide-desktop-icons": return .icons(.hide)
         case "show-desktop-icons": return .icons(.show)

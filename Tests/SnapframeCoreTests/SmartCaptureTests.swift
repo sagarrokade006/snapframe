@@ -134,6 +134,7 @@ final class AutomationCommandTests: XCTestCase {
         XCTAssertEqual(parse("snapframe://capture-window"), .capture(.window))
         XCTAssertEqual(parse("snapframe://scrolling-capture"), .capture(.scrolling))
         XCTAssertEqual(parse("snapframe://capture-text"), .capture(.text))
+        XCTAssertEqual(parse("snapframe://record-screen"), .capture(.record))
         XCTAssertEqual(parse("SNAPFRAME://Capture-Fullscreen"), .capture(.fullscreen))
     }
 

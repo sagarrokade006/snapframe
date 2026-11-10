@@ -96,8 +96,15 @@ struct QuickAccessCard: View {
 
             HStack(spacing: 4) {
                 quick("Copy", "doc.on.doc") { library.copy(item) }
-                quick("Edit", "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
-                quick("Float", "pip") { PinController.shared.pin(item) }
+                if item.isVideo {
+                    quick("Play", "play.fill") { library.open(item) }
+                    if item.canTrim {
+                        quick("Trim", "timeline.selection") { TrimController.shared.open(item) }
+                    }
+                } else {
+                    quick("Edit", "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
+                    quick("Float", "pip") { PinController.shared.pin(item) }
+                }
                 quick("Reveal", "folder") { library.reveal(item) }
                 quick("Close", "xmark") {}
             }

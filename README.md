@@ -4,7 +4,7 @@
 
 A free menu-bar screenshot app for macOS 14 and later.
 
-Snapframe has no accounts, uploads, online models, analytics or crash reporting. Its only network use is checking GitHub for app updates.
+Snapframe has no accounts, uploads, online models, analytics or crash reporting. Its only network use is checking GitHub for app updates. The microphone and camera are used only during recordings where you turn them on.
 
 ## Screenshots
 
@@ -33,6 +33,9 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 - Scrolling capture that stitches long pages and skips sidebars and fixed bars
 - On-device text recognition and QR code reading
 - Hide desktop icons, on demand or just while capturing
+- Screen recording to MP4 or GIF, with separate microphone and system audio tracks
+- Webcam bubble, click highlights and shortcut display while recording
+- Pause, restart, trim, and automatic recovery after a crash
 - `snapframe://` links for scripts and launchers
 - Custom file names, PNG, JPEG or HEIC, and global shortcuts
 - In-app updates with a changelog
@@ -61,14 +64,15 @@ Later versions install from inside the app, and your settings and permissions st
 | Scrolling Capture | ⌃⌥S |
 | Capture Text | ⌃⌥O |
 | Hide Desktop Icons | ⌃⌥D |
+| Record Screen | ⌃⌥R |
 
-In the overlay, press A, W, F, S or O to switch modes, T to cycle the timer, Return to confirm and Esc to cancel. Hold Shift for a square area or to include the wallpaper with a window. Hold Control to copy without saving. Hold Command to turn off edge snapping.
+In the overlay, press A, W, F, S, O or R to switch modes, T to cycle the timer, Return to confirm and Esc to cancel. Hold Shift for a square area or to include the wallpaper with a window. Hold Control to copy without saving. Hold Command to turn off edge snapping.
 
 ## Automation
 
 Other apps can run Snapframe with links. Snapframe asks first unless you change this in Settings > General.
 
-`capture-area`, `capture-window`, `capture-fullscreen`, `capture-previous-area`, `self-timer`, `all-in-one`, `scrolling-capture`, `capture-text`, `hide-desktop-icons`, `show-desktop-icons`, `toggle-desktop-icons`, `open-home`, `open-settings`
+`capture-area`, `capture-window`, `capture-fullscreen`, `capture-previous-area`, `self-timer`, `all-in-one`, `scrolling-capture`, `capture-text`, `record-screen`, `hide-desktop-icons`, `show-desktop-icons`, `toggle-desktop-icons`, `open-home`, `open-settings`
 
 For example, `snapframe://capture-area?x=100&y=100&width=800&height=600&display=0` captures an exact area.
 

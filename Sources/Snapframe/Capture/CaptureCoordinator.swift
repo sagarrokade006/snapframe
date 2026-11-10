@@ -22,6 +22,10 @@ final class CaptureCoordinator {
     }
 
     func begin(_ action: ShortcutAction) {
+        if action == .record, RecordingController.shared.isRecording {
+            RecordingController.shared.requestStop()
+            return
+        }
         guard !isBusy else { return }
         isBusy = true
         Task {
@@ -52,6 +56,8 @@ final class CaptureCoordinator {
             try await runOverlay(mode: .scrolling, timer: 0)
         case .text:
             try await runOverlay(mode: .text, timer: 0)
+        case .record:
+            try await runOverlay(mode: .record, timer: 0)
         case .toggleDesktopIcons:
             await DesktopIconCover.shared.toggle()
         case .fullscreen:
@@ -97,6 +103,11 @@ final class CaptureCoordinator {
     }
 
     private func captureTarget(_ outcome: OverlaySession.Outcome) async throws {
+        if outcome.mode == .record {
+            try await captureRecording(outcome)
+            return
+        }
+
         if case .area(let snapshot, let rect) = outcome.target {
             if outcome.mode == .scrolling {
                 try await captureScrolling(snapshot: snapshot, rect: rect, copyOnly: outcome.copyOnly)
@@ -141,6 +152,74 @@ final class CaptureCoordinator {
             } else {
                 let shot = try await service.captureDisplay(id: snapshot.displayID, options: options)
                 try await deliver(shot.image, scale: shot.scale, modeName: "Fullscreen", copyOnly: outcome.copyOnly)
+            }
+        }
+    }
+
+    private func captureRecording(_ outcome: OverlaySession.Outcome) async throws {
+        let displayID: CGDirectDisplayID
+        let rect: CGRect
+        switch outcome.target {
+        case .area(let snapshot, let selection):
+            displayID = snapshot.displayID
+            rect = selection
+        case .fullscreen(let snapshot):
+            displayID = snapshot.displayID
+            rect = snapshot.localBounds
+        case .window:
+            return
+        }
+        guard let output = try await RecordingController.shared.run(displayID: displayID, rect: rect, showsCursor: true) else { return }
+        try await finishRecording(movie: output.movie, isGIF: output.isGIF, recovered: false)
+    }
+
+    /// Turns a finished or rescued movie into a file in the export folder and a library entry.
+    private func finishRecording(movie: URL, isGIF: Bool, recovered: Bool) async throws {
+        let manager = FileManager.default
+        try manager.createDirectory(at: settings.exportDirectory, withIntermediateDirectories: true)
+        let mode = recovered ? "Recovered" : (isGIF ? "GIF" : "Recording")
+        let name = NameTemplate(pattern: settings.namePattern).render(date: Date(), mode: mode)
+        let destination = NameTemplate.uniqueURL(
+            directory: settings.exportDirectory, baseName: name, fileExtension: isGIF ? "gif" : "mp4"
+        ) { manager.fileExists(atPath: $0.path) }
+
+        if isGIF {
+            try await RecordingExport.makeGIF(from: movie, to: destination)
+        } else {
+            try await RecordingExport.makeMP4(from: movie, to: destination)
+        }
+        let poster = await RecordingExport.poster(of: movie)
+        RecordingExport.removeWorkspace(of: movie)
+
+        if settings.afterCapture.copies {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.writeObjects([destination as NSURL])
+        }
+        if settings.playSound { NSSound(named: "Tink")?.play() }
+
+        let message = recovered ? "Recording recovered after an unexpected quit" : "Saved to \(destination.deletingLastPathComponent().lastPathComponent)"
+        guard let poster, let item = await library.add(
+            image: poster, scale: 1, kind: isGIF ? CaptureItem.gifKind : CaptureItem.recordingKind,
+            name: name, formatTitle: isGIF ? "GIF" : "MP4", savedURL: destination
+        ) else {
+            showToast(message, reveal: destination)
+            return
+        }
+        QuickAccessController.shared.show(item, message: message)
+    }
+
+    /// Rescues recordings left behind by a crash or forced quit.
+    func recoverRecordings() {
+        guard !isBusy else { return }
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            for movie in await RecordingExport.recoverableMovies() {
+                do {
+                    try await finishRecording(movie: movie, isGIF: false, recovered: true)
+                } catch {
+                    report(error)
+                }
             }
         }
     }

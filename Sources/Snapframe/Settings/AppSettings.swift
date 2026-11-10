@@ -33,6 +33,15 @@ final class AppSettings: ObservableObject {
     @Published var detectTextLanguage: Bool { didSet { defaults.set(detectTextLanguage, forKey: "detectTextLanguage") } }
     @Published var hideIconsWhileCapturing: Bool { didSet { defaults.set(hideIconsWhileCapturing, forKey: "hideIconsWhileCapturing") } }
     @Published var automationPolicy: AutomationPolicy { didSet { defaults.set(automationPolicy.rawValue, forKey: "automationPolicy") } }
+    @Published var recordOutputGIF: Bool { didSet { defaults.set(recordOutputGIF, forKey: "recordOutputGIF") } }
+    @Published var recordMicrophone: Bool { didSet { defaults.set(recordMicrophone, forKey: "recordMicrophone") } }
+    @Published var recordSystemAudio: Bool { didSet { defaults.set(recordSystemAudio, forKey: "recordSystemAudio") } }
+    @Published var recordCamera: Bool { didSet { defaults.set(recordCamera, forKey: "recordCamera") } }
+    @Published var recordClicks: Bool { didSet { defaults.set(recordClicks, forKey: "recordClicks") } }
+    @Published var recordKeystrokes: Bool { didSet { defaults.set(recordKeystrokes, forKey: "recordKeystrokes") } }
+    @Published var recordFramesPerSecond: Int { didSet { defaults.set(recordFramesPerSecond, forKey: "recordFramesPerSecond") } }
+    @Published var recordMaximumHeight: Int { didSet { defaults.set(recordMaximumHeight, forKey: "recordMaximumHeight") } }
+    @Published var showRecordingTime: Bool { didSet { defaults.set(showRecordingTime, forKey: "showRecordingTime") } }
     @Published var shortcuts: [ShortcutAction: Shortcut] { didSet { saveShortcuts() } }
 
     /// Lets onboarding continue where it stopped after the restart macOS requires.
@@ -79,6 +88,10 @@ final class AppSettings: ObservableObject {
             "openHomeAtLaunch": true,
             "keepLineBreaks": true,
             "detectTextLanguage": true,
+            "recordSystemAudio": true,
+            "recordClicks": true,
+            "recordFramesPerSecond": 30,
+            "showRecordingTime": true,
         ])
 
         playSound = store.bool(forKey: "playSound")
@@ -101,6 +114,15 @@ final class AppSettings: ObservableObject {
         keepLineBreaks = store.bool(forKey: "keepLineBreaks")
         detectTextLanguage = store.bool(forKey: "detectTextLanguage")
         hideIconsWhileCapturing = store.bool(forKey: "hideIconsWhileCapturing")
+        recordOutputGIF = store.bool(forKey: "recordOutputGIF")
+        recordMicrophone = store.bool(forKey: "recordMicrophone")
+        recordSystemAudio = store.bool(forKey: "recordSystemAudio")
+        recordCamera = store.bool(forKey: "recordCamera")
+        recordClicks = store.bool(forKey: "recordClicks")
+        recordKeystrokes = store.bool(forKey: "recordKeystrokes")
+        recordFramesPerSecond = store.integer(forKey: "recordFramesPerSecond")
+        recordMaximumHeight = store.integer(forKey: "recordMaximumHeight")
+        showRecordingTime = store.bool(forKey: "showRecordingTime")
         automationPolicy = AutomationPolicy(rawValue: store.string(forKey: "automationPolicy") ?? "") ?? .ask
         shortcuts = Self.loadShortcuts(from: store)
     }

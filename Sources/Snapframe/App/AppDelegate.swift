@@ -39,6 +39,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hotKeys.register(settings.shortcuts)
         shortcutObserver = settings.$shortcuts.dropFirst().sink { hotKeys.register($0) }
 
+        coordinator.recoverRecordings()
+
         if !settings.onboardingCompleted || !PermissionManager.isScreenRecordingGranted {
             showOnboarding()
         } else if settings.openHomeAtLaunch && !launchedAtLogin {

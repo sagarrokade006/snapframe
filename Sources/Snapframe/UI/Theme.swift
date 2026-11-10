@@ -43,6 +43,7 @@ extension ShortcutAction {
         case .scrolling: return "scroll"
         case .text: return "text.viewfinder"
         case .toggleDesktopIcons: return "eye.slash"
+        case .record: return "record.circle"
         }
     }
 }

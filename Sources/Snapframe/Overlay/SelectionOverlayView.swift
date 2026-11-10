@@ -62,7 +62,7 @@ final class SelectionOverlayView: NSView {
     private let backdrop: NSImage
     private var trackingArea: NSTrackingArea?
 
-    private static let barSize = CGSize(width: 960, height: 116)
+    private static let barSize = CGSize(width: 1060, height: 116)
     private static let loupeColumns = 13
     private static let loupeRows = 11
 
@@ -155,7 +155,7 @@ final class SelectionOverlayView: NSView {
         }
 
         switch session.mode {
-        case .area, .scrolling, .text: drawAreaMode()
+        case .area, .scrolling, .text, .record: drawAreaMode()
         case .window: drawWindowMode()
         case .fullscreen: drawFullscreenMode()
         }
@@ -402,11 +402,11 @@ final class SelectionOverlayView: NSView {
         var items: [BarItem] = []
 
         let timerWidth: CGFloat = 112, closeWidth: CGFloat = 52, gap: CGFloat = 6, divider: CGFloat = 17
-        let modeWidth = (bar.width - 16 - timerWidth - closeWidth - divider - gap * 5) / 5
+        let modeWidth = (bar.width - 16 - timerWidth - closeWidth - divider - gap * 6) / 6
         var x = bar.minX + 8
         let topY = bar.minY + 8
 
-        let modes: [(OverlaySession.Mode, String)] = [(.area, "viewfinder"), (.window, "macwindow"), (.fullscreen, "display"), (.scrolling, "scroll"), (.text, "text.viewfinder")]
+        let modes: [(OverlaySession.Mode, String)] = [(.area, "viewfinder"), (.window, "macwindow"), (.fullscreen, "display"), (.scrolling, "scroll"), (.text, "text.viewfinder"), (.record, "record.circle")]
         for (mode, symbol) in modes {
             items.append(BarItem(
                 action: .mode(mode), label: mode.title, key: mode.key, symbol: symbol,

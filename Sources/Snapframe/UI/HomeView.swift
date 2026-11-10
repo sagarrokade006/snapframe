@@ -192,6 +192,7 @@ struct HomeView: View {
                     filter("Window", value: "Window")
                     filter("Fullscreen", value: "Fullscreen")
                     filter("Scrolling", value: "Scrolling")
+                    filter("Video", value: CaptureItem.recordingKind)
                 }
 
                 if visible.isEmpty {
@@ -225,7 +226,7 @@ struct HomeView: View {
             tile(.selfTimer, title: "Self-Timer")
             tile(.scrolling, title: "Scrolling")
             tile(.text, title: "Capture Text")
-            soonTile("Record", "record.circle")
+            tile(.record, title: "Record")
         }
     }
 
@@ -378,9 +379,16 @@ struct CaptureInspector: View {
 
             HStack(spacing: 6) {
                 IconAction(title: "Copy", symbol: "doc.on.doc", primary: true) { library.copy(item) }
-                IconAction(title: "Edit", symbol: "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
-                IconAction(title: "Float", symbol: "pip") { PinController.shared.pin(item) }
-                IconAction(title: "Share", symbol: "square.and.arrow.up") { ShareSheet.show(library.imageURL(id: item.id)) }
+                if item.isVideo {
+                    IconAction(title: "Play", symbol: "play.fill") { library.open(item) }
+                    if item.canTrim {
+                        IconAction(title: "Trim", symbol: "timeline.selection") { TrimController.shared.open(item) }
+                    }
+                } else {
+                    IconAction(title: "Edit", symbol: "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
+                    IconAction(title: "Float", symbol: "pip") { PinController.shared.pin(item) }
+                }
+                IconAction(title: "Share", symbol: "square.and.arrow.up") { ShareSheet.show(library.existingFile(for: item)) }
                 IconAction(title: "Reveal", symbol: "folder") { library.reveal(item) }
             }
 

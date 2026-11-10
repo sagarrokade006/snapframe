@@ -34,7 +34,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.3.0</string>
+	<string>1.4.0</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -54,8 +54,12 @@
 	<string>14.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Snapframe shows your camera only during recordings where you turn it on.</string>
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Snapframe records your voice only during recordings where you turn on the microphone.</string>
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>Snapframe captures the parts of your screen that you choose.</string>
 	<key>UTExportedTypeDeclarations</key>

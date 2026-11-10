@@ -108,6 +108,21 @@ final class CaptureLibrary: ObservableObject {
         save()
     }
 
+    /// Updates a recording's stored size and poster after it is trimmed.
+    func refreshVideo(_ item: CaptureItem) async {
+        guard let path = item.savedPath, let position = index.items.firstIndex(where: { $0.id == item.id }) else { return }
+        let url = URL(fileURLWithPath: path)
+        if let size = try? FileManager.default.attributesOfItem(atPath: path)[.size] as? Int {
+            index.items[position].byteCount = size
+        }
+        if let poster = await RecordingExport.poster(of: url),
+           let jpeg = try? OutputService.encode(OutputService.downscaled(poster, by: max(CGFloat(poster.width) / 640, 1)), format: .jpeg, quality: 0.85, scale: 1) {
+            try? jpeg.write(to: thumbnailURL(id: item.id), options: .atomic)
+            thumbnails.removeObject(forKey: item.id as NSUUID)
+        }
+        save()
+    }
+
     func thumbnail(for item: CaptureItem) -> NSImage? {
         let key = item.id as NSUUID
         if let cached = thumbnails.object(forKey: key) { return cached }
@@ -116,7 +131,7 @@ final class CaptureLibrary: ObservableObject {
         return image
     }
 
-    private func existingFile(for item: CaptureItem) -> URL {
+    func existingFile(for item: CaptureItem) -> URL {
         if let path = item.savedPath, FileManager.default.fileExists(atPath: path) {
             return URL(fileURLWithPath: path)
         }
@@ -124,6 +139,11 @@ final class CaptureLibrary: ObservableObject {
     }
 
     func copy(_ item: CaptureItem) {
+        if item.isVideo {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.writeObjects([existingFile(for: item) as NSURL])
+            return
+        }
         guard let data = try? Data(contentsOf: imageURL(id: item.id)) else { return }
         let board = NSPasteboard.general
         board.clearContents()

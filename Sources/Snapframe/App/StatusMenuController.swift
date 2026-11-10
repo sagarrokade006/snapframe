@@ -9,6 +9,7 @@ final class StatusMenuController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private let popover = NSPopover()
     private var updateObserver: AnyCancellable?
+    private var recordingObserver: AnyCancellable?
 
     var onCapture: ((ShortcutAction) -> Void)?
     var onOpenHome: (() -> Void)?
@@ -42,6 +43,17 @@ final class StatusMenuController: NSObject {
             }
         ))
 
+        // The menu bar shows the running time, and clicking it stops the recording.
+        recordingObserver = RecordingController.shared.$elapsed.combineLatest(RecordingController.shared.$isRecording)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] elapsed, isRecording in
+                guard let self, let button = self.statusItem.button else { return }
+                let showTime = isRecording && AppSettings.shared.showRecordingTime
+                self.statusItem.length = showTime ? NSStatusItem.variableLength : NSStatusItem.squareLength
+                button.imagePosition = showTime ? .imageLeading : .imageOnly
+                button.title = showTime ? " " + RecordingFormat.clock(elapsed) : ""
+            }
+
         updateObserver = UpdateController.shared.$availableVersion.sink { [weak self] version in
             self?.statusItem.button?.contentTintColor = version == nil ? nil : Palette.accent
         }
@@ -49,6 +61,10 @@ final class StatusMenuController: NSObject {
 
     @objc private func togglePopover() {
         guard let button = statusItem.button else { return }
+        if RecordingController.shared.isRecording {
+            RecordingController.shared.requestStop()
+            return
+        }
         if popover.isShown {
             popover.performClose(nil)
         } else {
@@ -113,7 +129,7 @@ struct PopoverView: View {
                 tile(.fullscreen, "Fullscreen")
                 tile(.previousArea, "Previous")
                 tile(.selfTimer, "Timer")
-                tile(.allInOne, "All-In-One")
+                tile(.record, "Record")
                 tile(.scrolling, "Scrolling")
                 tile(.text, "Text")
                 tile(.toggleDesktopIcons, iconCover.isVisible ? "Show Icons" : "Hide Icons")

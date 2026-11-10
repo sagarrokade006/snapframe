@@ -75,7 +75,7 @@ public struct Shortcut: Codable, Hashable, Sendable {
 }
 
 public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
-    case allInOne, area, previousArea, window, fullscreen, selfTimer, scrolling, text, toggleDesktopIcons
+    case allInOne, area, previousArea, window, fullscreen, selfTimer, scrolling, text, toggleDesktopIcons, record
 
     public var title: String {
         switch self {
@@ -88,6 +88,7 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
         case .scrolling: return "Scrolling Capture"
         case .text: return "Capture Text"
         case .toggleDesktopIcons: return "Hide Desktop Icons"
+        case .record: return "Record Screen"
         }
     }
 
@@ -104,6 +105,7 @@ public enum ShortcutAction: String, CaseIterable, Codable, Sendable {
         case .scrolling: return Shortcut(keyCode: 1, modifiers: modifiers)  // S
         case .text: return Shortcut(keyCode: 31, modifiers: modifiers)  // O
         case .toggleDesktopIcons: return Shortcut(keyCode: 2, modifiers: modifiers)  // D
+        case .record: return Shortcut(keyCode: 15, modifiers: modifiers)  // R
         }
     }
 }

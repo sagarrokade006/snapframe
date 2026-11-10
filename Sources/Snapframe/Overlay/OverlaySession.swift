@@ -5,7 +5,7 @@ import SnapframeCore
 @MainActor
 final class OverlaySession {
     enum Mode: String, CaseIterable {
-        case area, window, fullscreen, scrolling, text
+        case area, window, fullscreen, scrolling, text, record
 
         var title: String {
             switch self {
@@ -14,6 +14,7 @@ final class OverlaySession {
             case .fullscreen: return "Fullscreen"
             case .scrolling: return "Scrolling"
             case .text: return "Text"
+            case .record: return "Record"
             }
         }
 
@@ -24,6 +25,7 @@ final class OverlaySession {
             case .fullscreen: return "F"
             case .scrolling: return "S"
             case .text: return "O"
+            case .record: return "R"
             }
         }
     }
@@ -203,7 +205,7 @@ final class OverlaySession {
             if let hoveredWindow { finish(target: .window(hoveredWindow)) }
         case .fullscreen:
             finish(target: .fullscreen(snapshot))
-        case .area, .scrolling, .text:
+        case .area, .scrolling, .text, .record:
             if isAdjusting, selectionDisplay == snapshot.displayID, let selection {
                 if let handle = SelectionGeometry.handle(at: point, in: selection, radius: 9) {
                     gesture = .resizing(handle)
@@ -259,6 +261,10 @@ final class OverlaySession {
         guard case .drawing = gesture else { return }
 
         guard let selection, selection.width >= Self.minimumSelection, selection.height >= Self.minimumSelection else {
+            if mode == .record {
+                finish(target: .fullscreen(snapshot))
+                return
+            }
             clearSelection()
             invalidate()
             return
@@ -294,6 +300,7 @@ final class OverlaySession {
         case 3: setMode(.fullscreen)
         case 1: setMode(.scrolling)
         case 31: setMode(.text)
+        case 15: setMode(.record)
         case 17: cycleTimer()
         case 8: if event.modifierFlags.contains(.command) { copyColorUnderCursor() }
         case 123: nudge(dx: -1, dy: 0, event)
@@ -317,10 +324,12 @@ final class OverlaySession {
 
     private func confirm() {
         switch mode {
-        case .area, .scrolling, .text:
+        case .area, .scrolling, .text, .record:
             if isAdjusting, let selection,
                let snapshot = environment.displays.first(where: { $0.displayID == selectionDisplay }) {
                 finish(target: .area(snapshot, selection))
+            } else if mode == .record, !isDrawing, let snapshot = cursorSnapshot {
+                finish(target: .fullscreen(snapshot))
             }
         case .window:
             if let hoveredWindow { finish(target: .window(hoveredWindow)) }
