@@ -32,6 +32,14 @@ public enum AfterCapture: String, CaseIterable, Codable, Sendable {
         }
     }
 
+    public var shortTitle: String {
+        switch self {
+        case .saveAndCopy: return "Save + Copy"
+        case .save: return "Save"
+        case .copy: return "Copy"
+        }
+    }
+
     public var saves: Bool { self != .copy }
     public var copies: Bool { self != .save }
 }

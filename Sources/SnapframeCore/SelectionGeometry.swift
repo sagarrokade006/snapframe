@@ -14,10 +14,10 @@ public enum SelectionGeometry {
         )
     }
 
-    public static func rect(anchor: CGPoint, current: CGPoint, square: Bool, bounds: CGRect) -> CGRect {
+    public static func rect(anchor: CGPoint, current: CGPoint, aspect: CGFloat?, bounds: CGRect) -> CGRect {
         let start = clamp(anchor, to: bounds)
         let end = clamp(current, to: bounds)
-        guard square else {
+        guard let aspect else {
             return CGRect(
                 x: min(start.x, end.x),
                 y: min(start.y, end.y),
@@ -30,12 +30,13 @@ public enum SelectionGeometry {
         let goesDown = end.y >= start.y
         let roomX = goesRight ? bounds.maxX - start.x : start.x - bounds.minX
         let roomY = goesDown ? bounds.maxY - start.y : start.y - bounds.minY
-        let side = min(max(abs(end.x - start.x), abs(end.y - start.y)), roomX, roomY)
+        let width = min(max(abs(end.x - start.x), abs(end.y - start.y) * aspect), roomX, roomY * aspect)
+        let height = width / aspect
         return CGRect(
-            x: goesRight ? start.x : start.x - side,
-            y: goesDown ? start.y : start.y - side,
-            width: side,
-            height: side
+            x: goesRight ? start.x : start.x - width,
+            y: goesDown ? start.y : start.y - height,
+            width: width,
+            height: height
         )
     }
 

@@ -46,26 +46,26 @@ final class SelectionGeometryTests: XCTestCase {
 
     func testRectNormalizesDragDirection() {
         let rect = SelectionGeometry.rect(
-            anchor: CGPoint(x: 300, y: 400), current: CGPoint(x: 100, y: 200), square: false, bounds: bounds)
+            anchor: CGPoint(x: 300, y: 400), current: CGPoint(x: 100, y: 200), aspect: nil, bounds: bounds)
         XCTAssertEqual(rect, CGRect(x: 100, y: 200, width: 200, height: 200))
     }
 
     func testRectClampsToDisplay() {
         let rect = SelectionGeometry.rect(
-            anchor: CGPoint(x: 900, y: 700), current: CGPoint(x: 1400, y: 950), square: false, bounds: bounds)
+            anchor: CGPoint(x: 900, y: 700), current: CGPoint(x: 1400, y: 950), aspect: nil, bounds: bounds)
         XCTAssertEqual(rect, CGRect(x: 900, y: 700, width: 100, height: 100))
     }
 
     func testSquareStaysSquareAtEdge() {
         let rect = SelectionGeometry.rect(
-            anchor: CGPoint(x: 950, y: 100), current: CGPoint(x: 1200, y: 500), square: true, bounds: bounds)
+            anchor: CGPoint(x: 950, y: 100), current: CGPoint(x: 1200, y: 500), aspect: 1, bounds: bounds)
         XCTAssertEqual(rect.width, rect.height)
         XCTAssertEqual(rect.maxX, 1000)
     }
 
     func testSquareDragUpLeft() {
         let rect = SelectionGeometry.rect(
-            anchor: CGPoint(x: 500, y: 500), current: CGPoint(x: 400, y: 450), square: true, bounds: bounds)
+            anchor: CGPoint(x: 500, y: 500), current: CGPoint(x: 400, y: 450), aspect: 1, bounds: bounds)
         XCTAssertEqual(rect, CGRect(x: 400, y: 400, width: 100, height: 100))
     }
 

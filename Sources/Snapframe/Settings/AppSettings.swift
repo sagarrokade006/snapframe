@@ -26,7 +26,16 @@ final class AppSettings: ObservableObject {
     @Published var freezeScreen: Bool { didSet { defaults.set(freezeScreen, forKey: "freezeScreen") } }
     @Published var adjustBeforeCapture: Bool { didSet { defaults.set(adjustBeforeCapture, forKey: "adjustBeforeCapture") } }
     @Published var timerSeconds: Int { didSet { defaults.set(timerSeconds, forKey: "timerSeconds") } }
+    @Published var libraryRetentionDays: Int { didSet { defaults.set(libraryRetentionDays, forKey: "libraryRetentionDays") } }
+    @Published var openHomeAtLaunch: Bool { didSet { defaults.set(openHomeAtLaunch, forKey: "openHomeAtLaunch") } }
+    @Published var onboardingCompleted: Bool { didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") } }
     @Published var shortcuts: [ShortcutAction: Shortcut] { didSet { saveShortcuts() } }
+
+    /// Lets onboarding continue where it stopped after the restart macOS requires.
+    var onboardingStep: Int {
+        get { defaults.integer(forKey: "onboardingStep") }
+        set { defaults.set(newValue, forKey: "onboardingStep") }
+    }
 
     var lastOverlayMode: OverlaySession.Mode {
         get { OverlaySession.Mode(rawValue: defaults.string(forKey: "lastOverlayMode") ?? "") ?? .area }
@@ -54,6 +63,8 @@ final class AppSettings: ObservableObject {
             "freezeScreen": true,
             "quality": 0.9,
             "timerSeconds": 3,
+            "libraryRetentionDays": 30,
+            "openHomeAtLaunch": true,
         ])
 
         playSound = store.bool(forKey: "playSound")
@@ -70,6 +81,9 @@ final class AppSettings: ObservableObject {
         freezeScreen = store.bool(forKey: "freezeScreen")
         adjustBeforeCapture = store.bool(forKey: "adjustBeforeCapture")
         timerSeconds = store.integer(forKey: "timerSeconds")
+        libraryRetentionDays = store.integer(forKey: "libraryRetentionDays")
+        openHomeAtLaunch = store.bool(forKey: "openHomeAtLaunch")
+        onboardingCompleted = store.bool(forKey: "onboardingCompleted")
         shortcuts = Self.loadShortcuts(from: store)
     }
 

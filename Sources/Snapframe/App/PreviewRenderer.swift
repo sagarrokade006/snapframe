@@ -13,6 +13,9 @@ enum PreviewRenderer {
 
     static func run(into directory: URL) async {
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let sampleLibrary = directory.appendingPathComponent("library", isDirectory: true)
+        try? FileManager.default.removeItem(at: sampleLibrary)
+        CaptureLibrary.overrideDirectory = sampleLibrary
 
         let snapshot = DisplaySnapshot(
             displayID: 1,
@@ -57,10 +60,45 @@ enum PreviewRenderer {
         fullscreen.mouseMoved(to: CGPoint(x: 640, y: 300), on: snapshot)
         write(fullscreen, snapshot, "5-fullscreen", directory)
 
-        writeHosted(SettingsView(pane: .general), "6-settings-general", CGSize(width: 760, height: 580), directory)
-        writeHosted(SettingsView(pane: .screenshots), "7-settings-screenshots", CGSize(width: 760, height: 580), directory)
-        writeHosted(SettingsView(pane: .shortcuts), "8-settings-shortcuts", CGSize(width: 760, height: 580), directory)
-        writeHosted(OnboardingView(close: {}), "9-onboarding", CGSize(width: 440, height: 300), directory)
+        let library = CaptureLibrary.shared
+        let samples: [(String, String, CGRect, [String])] = [
+            ("Launch notes", "Area", CGRect(x: 360, y: 300, width: 1500, height: 760), ["Launch", "Design"]),
+            ("Open questions", "Area", CGRect(x: 400, y: 800, width: 1100, height: 520), ["Launch"]),
+            ("Field Notes window", "Window", CGRect(x: 360, y: 140, width: 1840, height: 1200), ["Design"]),
+            ("Whole desktop", "Fullscreen", CGRect(x: 0, y: 0, width: 2560, height: 1600), []),
+            ("Heading detail", "Area", CGRect(x: 440, y: 240, width: 900, height: 360), ["Bugs"]),
+            ("Notes column", "Window", CGRect(x: 360, y: 140, width: 1200, height: 1100), []),
+        ]
+        var created: [CaptureItem] = []
+        for (name, kind, crop, tags) in samples.reversed() {
+            guard let image = snapshot.image.cropping(to: crop),
+                  let item = await library.add(image: image, scale: scale, kind: kind, name: name, formatTitle: "PNG", savedURL: URL(fileURLWithPath: "/Desktop/\(name).png"))
+            else { continue }
+            tags.forEach { library.addTag($0, to: item) }
+            created.append(item)
+        }
+        if let first = created.first { library.togglePinned(first) }
+        if let launch = library.index.items.first { library.selectedID = launch.id }
+
+        writeHosted(HomeView(onCapture: { _ in }, onSettings: {}), "10-home", size, directory)
+        let popover = PopoverView(capture: { _ in }, openHome: {}, openSettings: {})
+        writeHosted(popover, "11-popover", NSHostingView(rootView: popover).fittingSize, directory)
+        if let item = library.index.items.first {
+            writeHosted(QuickAccessCard(item: item, message: "Saved to Desktop and copied", close: {}, hovering: { _ in }), "12-quick-access", CGSize(width: 356, height: 312), directory)
+        }
+        let settingsSize = CGSize(width: 1060, height: 700)
+        for (index, pane) in SettingsPane.allCases.enumerated() {
+            writeHosted(SettingsView(pane: pane), "2\(index)-settings-\(pane.rawValue.lowercased())", settingsSize, directory)
+        }
+        for step in 0...3 {
+            writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
+        }
+        let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
+        let release = AvailableRelease(version: AppVersion("1.2.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        UpdateController.shared.previewAvailable(release, phase: .available)
+        writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
+        UpdateController.shared.previewAvailable(release, phase: .installing)
+        writeHosted(UpdateView(close: {}), "41-update-installing", CGSize(width: 720, height: 620), directory)
 
         await checkOutput(snapshot: snapshot, directory: directory)
     }

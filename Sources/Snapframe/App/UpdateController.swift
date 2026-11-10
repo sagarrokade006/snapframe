@@ -1,7 +1,6 @@
 import AppKit
 import Combine
 import SnapframeCore
-import SwiftUI
 
 enum UpdatePhase: Equatable {
     case idle, checking, upToDate, available, downloading, installing
@@ -104,6 +103,14 @@ final class UpdateController: ObservableObject {
         }
     }
 
+    #if DEBUG
+    func previewAvailable(_ release: AvailableRelease, phase: UpdatePhase) {
+        self.release = release
+        availableVersion = release.version.description
+        self.phase = phase
+    }
+    #endif
+
     func install() {
         guard let release, !isBusy else { return }
         phase = .downloading
@@ -143,83 +150,3 @@ final class UpdateController: ObservableObject {
     }
 }
 
-struct UpdateView: View {
-    @ObservedObject private var updates = UpdateController.shared
-    var close: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(.title2.weight(.semibold))
-            Text(detail).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-
-            if updates.phase == .available, let notes = updates.release?.notes, !notes.isEmpty {
-                ScrollView {
-                    Text(Self.formatted(notes)).frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled)
-                }
-                .padding(10)
-                .background(Color.black.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
-            }
-
-            Spacer(minLength: 0)
-
-            if isWorking {
-                ProgressView().progressViewStyle(.linear)
-            }
-
-            HStack {
-                Spacer()
-                Button(updates.phase == .available ? "Later" : "Close", action: close)
-                    .disabled(isWorking && updates.phase != .checking)
-                if updates.phase == .available {
-                    Button("Install and Relaunch") { updates.install() }
-                        .keyboardShortcut(.defaultAction)
-                }
-            }
-        }
-        .padding(24)
-        .frame(width: 460, height: 320)
-        .background(Color.snapPanel)
-        .preferredColorScheme(.dark)
-        .tint(Color.snapAccent)
-    }
-
-    /// GitHub release notes are Markdown. Headings and bullets become simple rich text.
-    private static func formatted(_ notes: String) -> AttributedString {
-        let text = notes
-            .components(separatedBy: .newlines)
-            .map { line in
-                line
-                    .replacingOccurrences(of: #"^#{1,6}\s+(.*)$"#, with: "**$1**", options: .regularExpression)
-                    .replacingOccurrences(of: #"^\s*[-*]\s+"#, with: "•  ", options: .regularExpression)
-            }
-            .joined(separator: "\n")
-        let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        return (try? AttributedString(markdown: text, options: options)) ?? AttributedString(notes)
-    }
-
-    private var isWorking: Bool {
-        [.checking, .downloading, .installing].contains(updates.phase)
-    }
-
-    private var title: String {
-        switch updates.phase {
-        case .available: return "Snapframe \(updates.availableVersion ?? "") is available"
-        case .upToDate: return "Snapframe is up to date"
-        case .downloading: return "Downloading update"
-        case .installing: return "Installing update"
-        case .failed: return "Update failed"
-        case .idle, .checking: return "Checking for updates"
-        }
-    }
-
-    private var detail: String {
-        switch updates.phase {
-        case .available: return "You have \(UpdateService.currentVersion). Your settings, shortcuts and permissions stay as they are."
-        case .upToDate: return "You have the latest version, \(UpdateService.currentVersion)."
-        case .downloading: return "Snapframe will restart when it's ready."
-        case .installing: return "Checking the signature and replacing the app."
-        case .failed(let message): return message
-        case .idle, .checking: return "Looking at the latest release on GitHub."
-        }
-    }
-}

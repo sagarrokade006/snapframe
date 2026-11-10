@@ -8,6 +8,7 @@ final class CaptureCoordinator {
     private let service = CaptureService()
     private let settings = AppSettings.shared
     private var isBusy = false
+    private let library = CaptureLibrary.shared
     private var activeToast: PillPanel?
 
     var onPermissionNeeded: (() -> Void)?
@@ -67,7 +68,8 @@ final class CaptureCoordinator {
             mode: mode,
             timer: timer,
             freeze: settings.freezeScreen,
-            adjustBeforeCapture: settings.adjustBeforeCapture
+            adjustBeforeCapture: settings.adjustBeforeCapture,
+            afterCapture: settings.afterCapture
         )
 
         let outcome: OverlaySession.Outcome? = await withCheckedContinuation { continuation in
@@ -76,6 +78,7 @@ final class CaptureCoordinator {
         }
         guard let outcome else { return }
         settings.lastOverlayMode = outcome.mode
+        settings.afterCapture = outcome.afterCapture
 
         if outcome.timer > 0 {
             guard await CountdownController.run(seconds: outcome.timer) else { return }
@@ -139,13 +142,31 @@ final class CaptureCoordinator {
             NSSound(named: "Tink")?.play()
         }
 
-        if let saveError = result.saveError {
-            showToast("Could not save: \(saveError) Copied instead.", reveal: nil)
+        let name = result.savedURL?.deletingPathExtension().lastPathComponent
+            ?? NameTemplate(pattern: settings.namePattern).render(date: Date(), mode: modeName)
+        let item = await library.add(
+            image: image,
+            scale: scale,
+            kind: modeName,
+            name: name,
+            formatTitle: result.savedURL == nil ? "PNG" : settings.format.title,
+            savedURL: result.savedURL
+        )
+
+        let message: String
+        if result.saveError != nil {
+            message = "Could not save. Copied instead."
         } else if let url = result.savedURL {
             let folder = url.deletingLastPathComponent().lastPathComponent
-            showToast(result.copied ? "Saved to \(folder) and copied" : "Saved to \(folder)", reveal: url)
-        } else if result.copied {
-            showToast("Copied to clipboard", reveal: nil)
+            message = result.copied ? "Saved to \(folder) and copied" : "Saved to \(folder)"
+        } else {
+            message = "Copied to clipboard"
+        }
+
+        if let item {
+            QuickAccessController.shared.show(item, message: message)
+        } else {
+            showToast(message, reveal: result.savedURL)
         }
     }
 

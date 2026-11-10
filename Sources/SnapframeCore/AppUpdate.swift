@@ -39,6 +39,13 @@ public struct AvailableRelease: Equatable, Sendable {
     public let notes: String
     public let downloadURL: URL
     public let size: Int
+
+    public init(version: AppVersion, notes: String, downloadURL: URL, size: Int) {
+        self.version = version
+        self.notes = notes
+        self.downloadURL = downloadURL
+        self.size = size
+    }
 }
 
 public enum ReleaseFeedError: LocalizedError, Equatable {

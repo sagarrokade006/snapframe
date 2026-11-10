@@ -8,13 +8,26 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 
 ## Screenshots
 
-![Selecting an area to capture, with its size shown and resize handles](docs/screenshots/area.png)
+![Snapframe Home window with capture tiles and recent captures](docs/screenshots/home.png)
 
-![Highlighting a window to capture](docs/screenshots/window.png)
+![Capture overlay with selection, aspect ratios and after-capture choices](docs/screenshots/overlay.png)
 
-| Screenshot settings | Global shortcuts |
+| Menu bar | Software update |
 |---|---|
-| ![Screenshot settings](docs/screenshots/settings.png) | ![Global shortcut settings](docs/screenshots/shortcuts.png) |
+| ![Menu bar popover](docs/screenshots/popover.png) | ![Update window with changelog](docs/screenshots/update.png) |
+
+| File names | Shortcuts |
+|---|---|
+| ![File name builder](docs/screenshots/settings.png) | ![Shortcut settings](docs/screenshots/shortcuts.png) |
+
+## Features
+
+- Capture an area, window or full screen, repeat the previous area, or use a self-timer
+- Aspect ratios, freeze screen, edge snapping and a loupe with color readout
+- A private library with search, tags, pinning and auto-delete
+- A preview card after every capture, and floating images that stay on top
+- Custom file names, PNG, JPEG or HEIC, and global shortcuts
+- In-app updates with a changelog
 
 ## Install
 
@@ -23,7 +36,7 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 3. Open Snapframe. macOS will block the first launch because the app is not notarized. Go to System Settings > Privacy & Security and choose **Open Anyway**.
 4. Grant Screen Recording when asked, then restart Snapframe from its window.
 
-Snapframe has no Dock icon. Look for its icon in the menu bar. Opening the app again shows Settings.
+Snapframe has no Dock icon. Look for its icon in the menu bar. Opening the app again shows Home.
 
 Later versions install from inside the app, and your settings and permissions stay as they are.
 

@@ -36,6 +36,7 @@ final class OverlaySession {
         let copyOnly: Bool
         let includeWallpaper: Bool
         let mode: Mode
+        let afterCapture: AfterCapture
     }
 
     private enum Gesture {
@@ -56,6 +57,9 @@ final class OverlaySession {
 
     private(set) var mode: Mode
     private(set) var timer: Int
+    private(set) var aspect = CaptureAspect.free
+    private(set) var afterCapture: AfterCapture
+    private(set) var colorCopied = false
     private(set) var selection: CGRect?
     private(set) var selectionDisplay: CGDirectDisplayID?
     private(set) var cursorDisplay: CGDirectDisplayID?
@@ -67,7 +71,8 @@ final class OverlaySession {
     private var panels: [OverlayPanel] = []
     private var finished = false
 
-    init(environment: CaptureEnvironment, mode: Mode, timer: Int, freeze: Bool, adjustBeforeCapture: Bool) {
+    init(environment: CaptureEnvironment, mode: Mode, timer: Int, freeze: Bool, adjustBeforeCapture: Bool, afterCapture: AfterCapture = .saveAndCopy) {
+        self.afterCapture = afterCapture
         self.environment = environment
         self.mode = mode
         self.timer = timer
@@ -127,6 +132,26 @@ final class OverlaySession {
         invalidate()
     }
 
+    func setAspect(_ newAspect: CaptureAspect) {
+        aspect = newAspect
+        if mode != .area { setMode(.area) }
+        clearSelection()
+        invalidate()
+    }
+
+    func setAfterCapture(_ value: AfterCapture) {
+        afterCapture = value
+        invalidate()
+    }
+
+    func copyColorUnderCursor() {
+        guard let cursorPoint, let hex = cursorSnapshot?.hexColor(at: cursorPoint) else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(hex, forType: .string)
+        colorCopied = true
+        invalidate()
+    }
+
     func cycleTimer() {
         let index = Self.timerSteps.firstIndex(of: timer) ?? 0
         timer = Self.timerSteps[(index + 1) % Self.timerSteps.count]
@@ -151,6 +176,7 @@ final class OverlaySession {
     // MARK: Pointer
 
     func mouseMoved(to point: CGPoint, on snapshot: DisplaySnapshot) {
+        colorCopied = false
         cursorDisplay = snapshot.displayID
         cursorPoint = point
         updateHover(point: point, snapshot: snapshot)
@@ -204,7 +230,7 @@ final class OverlaySession {
             selection = SelectionGeometry.rect(
                 anchor: anchor,
                 current: snappedPoint(point, on: snapshot),
-                square: flags.contains(.shift),
+                aspect: flags.contains(.shift) ? 1 : aspect.value,
                 bounds: snapshot.localBounds
             )
         case .moving(let grab, let original):
@@ -263,6 +289,7 @@ final class OverlaySession {
         case 13: setMode(.window)
         case 3: setMode(.fullscreen)
         case 17: cycleTimer()
+        case 8: if event.modifierFlags.contains(.command) { copyColorUnderCursor() }
         case 123: nudge(dx: -1, dy: 0, event)
         case 124: nudge(dx: 1, dy: 0, event)
         case 125: nudge(dx: 0, dy: 1, event)
@@ -305,7 +332,8 @@ final class OverlaySession {
             timer: timer,
             copyOnly: flags.contains(.control),
             includeWallpaper: flags.contains(.shift),
-            mode: mode
+            mode: mode,
+            afterCapture: afterCapture
         ))
     }
 

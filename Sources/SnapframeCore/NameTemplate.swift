@@ -54,6 +54,21 @@ public struct NameTemplate: Equatable, Sendable {
         return cleaned.isEmpty ? "Snapframe" : cleaned
     }
 
+    /// Splits a pattern into the words shown as chips in Settings.
+    public static func chips(from pattern: String) -> [String] {
+        pattern.split(whereSeparator: \.isWhitespace).map(String.init)
+    }
+
+    public static func pattern(from chips: [String]) -> String {
+        chips.joined(separator: " ")
+    }
+
+    /// `{date}` reads as `Date`. Plain words stay as they are.
+    public static func chipTitle(_ chip: String) -> String {
+        guard chip.hasPrefix("{"), chip.hasSuffix("}") else { return chip }
+        return chip.dropFirst().dropLast().capitalized
+    }
+
     /// Picks `name.ext`, or `name 2.ext` and so on when earlier names are taken.
     public static func uniqueURL(
         directory: URL,

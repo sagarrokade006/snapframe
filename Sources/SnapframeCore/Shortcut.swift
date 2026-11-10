@@ -40,6 +40,16 @@ public struct Shortcut: Codable, Hashable, Sendable {
         Self.keyNames[keyCode] ?? Self.functionKeys[keyCode] ?? "Key \(keyCode)"
     }
 
+    /// One entry per keycap: each modifier, then the key.
+    public var keyParts: [String] {
+        var parts: [String] = []
+        if modifiers.contains(.control) { parts.append("⌃") }
+        if modifiers.contains(.option) { parts.append("⌥") }
+        if modifiers.contains(.shift) { parts.append("⇧") }
+        if modifiers.contains(.command) { parts.append("⌘") }
+        return parts + [keyName]
+    }
+
     public var displayString: String {
         var text = ""
         if modifiers.contains(.control) { text += "⌃" }
