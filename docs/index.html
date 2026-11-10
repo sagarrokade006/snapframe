@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snapframe: free screenshots and screen recording for Mac</title>
+<meta name="description" content="Capture, mark up and record your Mac. Scrolling capture, text recognition, an Annotate editor and screen recording. Free, with no accounts and no cloud.">
+<meta property="og:title" content="Snapframe: free screenshots and screen recording for Mac">
+<meta property="og:description" content="Capture, mark up and record your Mac. Free, with no accounts and no cloud.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sagarrokade006.github.io/snapframe/">
+<meta property="og:image" content="https://sagarrokade006.github.io/snapframe/screenshots/home.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0c0d0f">
+<link rel="icon" href="icon.png">
+<script>document.documentElement.classList.add('js')</script>
+<link rel="stylesheet" href="site.css">
+<script src="site.js" defer></script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top"><img src="icon.png" width="32" height="32" alt=""><span>Snapframe</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#capture">Capture</a>
+      <a href="#annotate">Annotate</a>
+      <a href="#record">Record</a>
+      <a href="#everything">Everything</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#changelog">Changelog</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="link-quiet" href="https://github.com/sagarrokade006/snapframe">GitHub</a>
+      <a class="btn btn-small js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<section class="hero" id="top">
+  <div class="wrap hero-copy">
+    <p class="eyebrow reveal">For macOS 14 and later</p>
+    <h1 class="hero-title">
+      <span class="line"><span>Capture anything.</span></span>
+      <span class="line"><span>Mark it up.</span></span>
+      <span class="line"><span class="accent">Keep it yours.</span></span>
+    </h1>
+    <p class="lede reveal" style="--d:.25s">Screenshots, scrolling capture, text recognition, annotation and screen recording in one menu-bar app. Every feature is free. There are no accounts and no cloud.</p>
+    <div class="cta reveal" style="--d:.35s">
+      <a class="btn js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download for Mac <span class="btn-note js-version"></span></a>
+      <a class="btn btn-ghost" href="#install">How to install</a>
+    </div>
+    <p class="fine reveal" style="--d:.42s">Apple silicon and Intel. In-app updates included.</p>
+  </div>
+
+  <div class="wrap hero-stage" id="heroStage">
+    <div class="hero-window">
+      <img src="screenshots/home.png" width="1600" height="1000" alt="Snapframe Home window with capture tiles, recent captures and a details panel" fetchpriority="high">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    </div>
+    <img class="float float-left" data-speed="-0.08" src="screenshots/popover.png" width="384" alt="Menu bar popover with capture tiles" loading="lazy">
+    <img class="float float-right" data-speed="-0.14" src="screenshots/record-setup.png" width="300" alt="Recording options panel" loading="lazy">
+  </div>
+</section>
+
+<section class="promises">
+  <div class="wrap promise-grid">
+    <div class="promise reveal"><strong>Free</strong><span>Every feature, with no tiers or subscriptions</span></div>
+    <div class="promise reveal" style="--d:.08s"><strong>Private</strong><span>No accounts, uploads or analytics</span></div>
+    <div class="promise reveal" style="--d:.16s"><strong>On your Mac</strong><span>Text recognition runs on the device</span></div>
+    <div class="promise reveal" style="--d:.24s"><strong>One shortcut away</strong><span>Lives quietly in your menu bar</span></div>
+  </div>
+</section>
+
+<section class="feature" id="capture">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Capture</p>
+      <h2>Select exactly what you mean.</h2>
+      <p>Freeze the screen, drag an area and let edges snap to windows. A loupe shows every pixel and its color, and aspect ratios lock the shape before you start.</p>
+      <ul class="ticks">
+        <li>Area, window, fullscreen and previous area</li>
+        <li>Self-timer of 3, 5 or 10 seconds</li>
+        <li>Works across multiple displays</li>
+        <li>Preview card with copy, edit, float and reveal</li>
+      </ul>
+    </div>
+    <div class="stage demo-capture reveal" style="--d:.1s" aria-hidden="true">
+      <div class="doc">
+        <div class="doc-bar"><i></i><i></i><i></i><b>Launch notes</b></div>
+        <div class="doc-body"><h4>Launch notes</h4><p></p><p class="s"></p><p></p><p class="m"></p><h5></h5><p class="s"></p><p></p></div>
+      </div>
+      <div class="sel"><em>1200 × 660</em><u></u><u></u><u></u><u></u></div>
+      <div class="loupe"><div class="px"></div><small>#F7F7F5</small></div>
+      <div class="flash"></div>
+      <div class="qa"><div class="qa-img"><span></span><span></span><span></span></div><div class="qa-row"><b>Saved and copied</b></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature alt" id="scrolling">
+  <div class="wrap split reverse">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Scrolling capture</p>
+      <h2>Long pages, one clean image.</h2>
+      <p>Select an area and scroll normally. Snapframe works out which part is actually moving, so sidebars stay out of the result and fixed headers appear only once.</p>
+      <ul class="ticks">
+        <li>Live preview while you scroll</li>
+        <li>Skips sidebars and fixed bars</li>
+        <li>Tells you if you scroll too fast</li>
+      </ul>
+    </div>
+    <div class="stage demo-scroll reveal" style="--d:.1s" aria-hidden="true">
+      <div class="scroll-view">
+        <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="pane"><div class="pane-track"><div class="pg"></div></div></div>
+      </div>
+      <div class="arrow-flow"></div>
+      <div class="scroll-out"><div class="out-fill"><div class="pg"></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="feature" id="text">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Text and QR codes</p>
+      <h2>Copy text from anything on screen.</h2>
+      <p>Drag over a video, a photo or a locked PDF and the words land on your clipboard. Recognition runs on your Mac, so nothing is sent anywhere.</p>
+      <ul class="ticks">
+        <li>Automatic language detection</li>
+        <li>Keep or remove line breaks</li>
+        <li>Reads QR codes, and only opens links when you click</li>
+      </ul>
+    </div>
+    <div class="stage demo-text reveal" style="--d:.1s" aria-hidden="true">
+      <div class="ocr-source">
+        <span>Check the onboarding copy</span>
+        <span>before the next build.</span>
+        <span>Confirm the shortcut defaults.</span>
+        <div class="scan"></div>
+      </div>
+      <div class="ocr-card">
+        <b><i class="dot"></i>Copied to clipboard</b>
+        <p class="typed">Check the onboarding copy before the next build. Confirm the shortcut defaults.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feature alt" id="annotate">
+  <div class="wrap split reverse">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Annotate</p>
+      <h2>Explain it without a meeting.</h2>
+      <p>Fourteen tools, all editable until you say otherwise. Add a background and your screenshot is ready to post, or reopen it next week and keep working.</p>
+      <ul class="ticks">
+        <li>Arrows, shapes, marker, text, counters and spotlight</li>
+        <li>Colors, gradients, padding, corners and shadow</li>
+        <li>Full undo, and <code>.snapframe</code> project files</li>
+        <li>Redactions that permanently remove the pixels</li>
+        <li>Password-protected PDF export</li>
+      </ul>
+    </div>
+    <div class="stage demo-annotate reveal" style="--d:.1s" aria-hidden="true">
+      <div class="backdrop">
+        <div class="doc">
+          <div class="doc-body">
+            <h4>Launch notes</h4>
+            <p></p>
+            <p class="m hl"><span></span></p>
+            <p class="s"></p>
+            <p class="redact"><span></span></p>
+            <p></p>
+          </div>
+          <svg viewBox="0 0 400 260" preserveAspectRatio="none">
+            <rect class="draw-rect" x="18" y="14" width="150" height="40" rx="4"/>
+            <path class="draw-arrow" d="M340 190 C 310 120, 270 96, 214 92"/>
+            <path class="draw-head" d="M230 80 L212 92 L230 106"/>
+          </svg>
+          <span class="count">1</span>
+          <span class="tag">Confirm before release</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap shot-wide reveal">
+    <img src="screenshots/annotate.png" width="1600" height="1000" alt="Annotate editor with its toolbar, color choices and background panel" loading="lazy">
+  </div>
+</section>
+
+<section class="feature" id="record">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Record</p>
+      <h2>Show it, don't describe it.</h2>
+      <p>Record your screen or any area to MP4 or GIF. Your voice and system audio stay on separate tracks, and if your Mac crashes mid-take, the recording is waiting for you at next launch.</p>
+      <ul class="ticks">
+        <li>Webcam bubble and click highlights</li>
+        <li>Shows shortcuts you press, never ordinary typing</li>
+        <li>Pause, restart or discard from a small control bar</li>
+        <li>Trim from Home or the preview card</li>
+        <li>Up to 60 frames per second</li>
+      </ul>
+    </div>
+    <div class="stage demo-record reveal" style="--d:.1s" aria-hidden="true">
+      <div class="doc"><div class="doc-body"><h4>Walkthrough</h4><p></p><p class="s"></p><div class="pills"><i class="primary"></i><i></i></div></div></div>
+      <div class="ripple"></div>
+      <div class="cursor"></div>
+      <div class="cam"><i></i><b></b></div>
+      <div class="keys"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>P</kbd></div>
+      <div class="hud">
+        <i class="rec"></i><span id="recClock">00:00</span>
+        <div class="meter"><s></s><s></s><s></s><s></s><s></s><s></s></div>
+        <b>Pause</b><b class="stop">Stop</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="tour">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">A closer look</p>
+      <h2>Designed down to the small panels.</h2>
+    </div>
+    <div class="gallery">
+      <figure class="reveal"><img src="screenshots/overlay.png" width="1600" height="1000" alt="Capture overlay with its toolbar" loading="lazy"><figcaption>Every capture mode in one toolbar</figcaption></figure>
+      <figure class="reveal" style="--d:.08s"><img src="screenshots/settings.png" width="1400" height="924" alt="File name builder in Settings" loading="lazy"><figcaption>Build file names with chips</figcaption></figure>
+      <figure class="reveal"><img src="screenshots/shortcuts.png" width="1400" height="924" alt="Keyboard shortcut settings" loading="lazy"><figcaption>Change any shortcut</figcaption></figure>
+      <figure class="reveal" style="--d:.08s"><img src="screenshots/update.png" width="1200" height="1033" alt="Update window with a changelog" loading="lazy"><figcaption>Updates that show what changed</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="everything">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Everything included</p>
+      <h2>No paid tier. This is the whole list.</h2>
+    </div>
+    <div class="list-grid">
+      <article class="reveal">
+        <h3>Capture</h3>
+        <ul>
+          <li>Area, window and fullscreen</li><li>Repeat the previous area</li><li>Self-timer</li><li>All-In-One overlay</li><li>Freeze screen while selecting</li><li>Crosshair and pixel loupe</li><li>Color readout, copied with ⌘C</li><li>Snap to window edges</li><li>Aspect ratios and square selection</li><li>Window shadow and wallpaper options</li><li>Hide desktop icons</li>
+        </ul>
+      </article>
+      <article class="reveal" style="--d:.06s">
+        <h3>Smart capture</h3>
+        <ul>
+          <li>Scrolling capture with live preview</li><li>Automatic sidebar and header handling</li><li>On-device text recognition</li><li>Automatic language detection</li><li>Keep or remove line breaks</li><li>QR code reading</li><li><code>snapframe://</code> automation links, with your approval</li>
+        </ul>
+      </article>
+      <article class="reveal" style="--d:.12s">
+        <h3>Annotate</h3>
+        <ul>
+          <li>Select, crop and resize</li><li>Arrow, line, rectangle and filled rectangle</li><li>Ellipse, freehand and marker</li><li>Text and numbered counters</li><li>Spotlight, in rectangle or oval</li><li>Secure, smooth or black-out redaction</li><li>Add images from a file or the clipboard</li><li>Colors, gradients, padding, corners and shadow</li><li>Undo, redo and duplicate</li><li>Editable <code>.snapframe</code> projects</li>
+        </ul>
+      </article>
+      <article class="reveal">
+        <h3>Record</h3>
+        <ul>
+          <li>Whole screen or any area</li><li>MP4 or GIF output</li><li>24, 30 or 60 frames per second</li><li>Maximum resolution setting</li><li>Separate microphone and system audio</li><li>Webcam bubble</li><li>Click highlights</li><li>Shortcut display</li><li>Pause, restart and discard</li><li>Time in the menu bar</li><li>Automatic crash recovery</li><li>Trim</li>
+        </ul>
+      </article>
+      <article class="reveal" style="--d:.06s">
+        <h3>Library</h3>
+        <ul>
+          <li>Home window with recent captures</li><li>Search by name or tag</li><li>Filter by capture type</li><li>Tags</li><li>Pins that survive auto-delete</li><li>Auto-delete after 7, 30 or 180 days, or never</li><li>Preview card after each capture</li><li>Float any capture above other windows</li>
+        </ul>
+      </article>
+      <article class="reveal" style="--d:.12s">
+        <h3>Output</h3>
+        <ul>
+          <li>PNG, JPEG and HEIC</li><li>Save, copy, or both</li><li>Open directly in the editor</li><li>Custom file name builder</li><li>Choose your export folder</li><li>Retina or 1x scaling</li><li>sRGB conversion</li><li>macOS share sheet</li><li>Password-protected PDF</li><li>In-app updates with a changelog</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="shortcuts">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Keyboard first</p>
+      <h2>Your hands can stay where they are.</h2>
+      <p>The defaults leave the macOS screenshot keys alone, and you can change any of them.</p>
+    </div>
+    <div class="keys-grid">
+      <div class="key-row reveal"><span>Capture Area</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>4</kbd></span></div>
+      <div class="key-row reveal"><span>Capture Window</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>5</kbd></span></div>
+      <div class="key-row reveal"><span>Capture Fullscreen</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>3</kbd></span></div>
+      <div class="key-row reveal"><span>Previous Area</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>P</kbd></span></div>
+      <div class="key-row reveal"><span>Self-Timer</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>T</kbd></span></div>
+      <div class="key-row reveal"><span>Scrolling Capture</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>S</kbd></span></div>
+      <div class="key-row reveal"><span>Capture Text</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>O</kbd></span></div>
+      <div class="key-row reveal"><span>Record Screen</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>R</kbd></span></div>
+      <div class="key-row reveal"><span>Hide Desktop Icons</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>D</kbd></span></div>
+      <div class="key-row reveal"><span>All-In-One</span><span class="caps"><kbd>⌃</kbd><kbd>⌥</kbd><kbd>1</kbd></span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="privacy">
+  <div class="wrap privacy">
+    <div class="reveal">
+      <p class="eyebrow">Privacy</p>
+      <h2>Nothing to sign in to. Nothing to leak.</h2>
+      <p class="lede small">Snapframe has no accounts, uploads, online models, analytics or crash reporting. This website doesn't track you either.</p>
+    </div>
+    <dl class="reveal" style="--d:.1s">
+      <div><dt>Network</dt><dd>Its only network use is checking GitHub for app updates.</dd></div>
+      <div><dt>Screen Recording</dt><dd>Required by macOS for any screen capture.</dd></div>
+      <div><dt>Microphone and camera</dt><dd>Used only during recordings where you turn them on.</dd></div>
+      <div><dt>Accessibility</dt><dd>Optional, and only to show shortcuts you press while recording.</dd></div>
+      <div><dt>Your captures</dt><dd>Saved to the folder you choose, with a private library copy on your Mac.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="section" id="install">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Install</p>
+      <h2>Up and running in a minute.</h2>
+      <p>Snapframe is signed but not notarized by Apple, so macOS asks you to approve it once.</p>
+    </div>
+    <ol class="steps">
+      <li class="reveal"><b>Download</b><span>Get the DMG from the latest release.</span></li>
+      <li class="reveal" style="--d:.08s"><b>Drag to Applications</b><span>Open the DMG and drag Snapframe across.</span></li>
+      <li class="reveal" style="--d:.16s"><b>Approve it once</b><span>Open the app, then go to System Settings &gt; Privacy &amp; Security and choose Open Anyway.</span></li>
+      <li class="reveal" style="--d:.24s"><b>Allow Screen Recording</b><span>Follow the short setup, and look for the icon in your menu bar.</span></li>
+    </ol>
+    <div class="cta center reveal"><a class="btn js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download for Mac <span class="btn-note js-version"></span></a></div>
+  </div>
+</section>
+
+<section class="section alt" id="faq">
+  <div class="wrap narrow">
+    <div class="section-head reveal"><p class="eyebrow">Questions</p><h2>Good to know.</h2></div>
+    <details class="reveal"><summary>Is it really free?</summary><p>Yes. Every feature is included, with no tiers, subscriptions or license keys.</p></details>
+    <details class="reveal"><summary>Why does macOS warn me the first time?</summary><p>Apple's notarization requires a paid developer membership. You approve Snapframe once in System Settings, and updates after that install inside the app.</p></details>
+    <details class="reveal"><summary>Will updating reset my settings?</summary><p>No. Updates replace the app in place, so your settings, shortcuts, library and permissions stay as they are.</p></details>
+    <details class="reveal"><summary>Does anything leave my Mac?</summary><p>Only a check for new versions on GitHub. Captures, recognized text and recordings stay on your Mac unless you choose to share them.</p></details>
+    <details class="reveal"><summary>Can other apps control Snapframe?</summary><p>Only with your approval. <code>snapframe://</code> links ask first, and you can always allow or block them in Settings.</p></details>
+    <details class="reveal"><summary>Why can I still see text under a redaction?</summary><p>Inside the editor a redaction is still movable. When you press Done or save a project, the original pixels are destroyed. Files you already saved elsewhere aren't changed.</p></details>
+  </div>
+</section>
+
+<section class="section" id="changelog">
+  <div class="wrap narrow">
+    <div class="section-head reveal"><p class="eyebrow">Changelog</p><h2>Recent releases.</h2></div>
+    <div id="releases">
+      <article class="release reveal"><header><b>1.4.0</b></header><ul><li>Screen recording to MP4 or GIF, with separate audio tracks</li><li>Webcam bubble, click highlights and shortcut display</li><li>Crash recovery and trim</li></ul></article>
+      <article class="release reveal"><header><b>1.3.0</b></header><ul><li>Scrolling capture, text recognition and QR codes</li><li>Hide desktop icons and automation links</li></ul></article>
+      <article class="release reveal"><header><b>1.2.0</b></header><ul><li>Annotate editor, backgrounds and editable projects</li><li>Password-protected PDF export</li></ul></article>
+    </div>
+    <p class="more reveal"><a href="https://github.com/sagarrokade006/snapframe/releases">All releases on GitHub</a></p>
+  </div>
+</section>
+
+<section class="section roadmap">
+  <div class="wrap">
+    <div class="section-head reveal"><p class="eyebrow">What's next</p><h2>Studio is on the way.</h2><p>A timeline editor with automatic zoom, a restyled cursor and polished exports.</p></div>
+    <ol class="timeline reveal">
+      <li class="done"><b>Capture</b></li>
+      <li class="done"><b>Annotate</b></li>
+      <li class="done"><b>Smart capture</b></li>
+      <li class="done"><b>Recording</b></li>
+      <li><b>Studio</b></li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <a class="brand" href="#top"><img src="icon.png" width="28" height="28" alt=""><span>Snapframe</span></a>
+    <nav aria-label="Footer">
+      <a href="https://github.com/sagarrokade006/snapframe">Source code</a>
+      <a href="https://github.com/sagarrokade006/snapframe/releases">Releases</a>
+      <a href="https://github.com/sagarrokade006/snapframe/issues">Report an issue</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

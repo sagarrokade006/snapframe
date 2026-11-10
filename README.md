@@ -8,7 +8,7 @@
 
 [![Latest release](https://img.shields.io/github/v/release/sagarrokade006/snapframe?label=release&color=FF6B3D)](https://github.com/sagarrokade006/snapframe/releases/latest) ![macOS 14 or later](https://img.shields.io/badge/macOS-14%2B-2A2C30) ![Apple silicon and Intel](https://img.shields.io/badge/Apple%20silicon%20%26%20Intel-supported-2A2C30) ![No accounts](https://img.shields.io/badge/accounts-none-6FD3C2)
 
-[**Download the latest version**](https://github.com/sagarrokade006/snapframe/releases/latest)&nbsp;&nbsp;·&nbsp;&nbsp;[Features](#features)&nbsp;&nbsp;·&nbsp;&nbsp;[Install](#install)&nbsp;&nbsp;·&nbsp;&nbsp;[Shortcuts](#keyboard-shortcuts)&nbsp;&nbsp;·&nbsp;&nbsp;[Privacy](#privacy)
+[**Download the latest version**](https://github.com/sagarrokade006/snapframe/releases/latest)&nbsp;&nbsp;·&nbsp;&nbsp;[Website](https://sagarrokade006.github.io/snapframe/)&nbsp;&nbsp;·&nbsp;&nbsp;[Features](#features)&nbsp;&nbsp;·&nbsp;&nbsp;[Install](#install)&nbsp;&nbsp;·&nbsp;&nbsp;[Shortcuts](#keyboard-shortcuts)&nbsp;&nbsp;·&nbsp;&nbsp;[Privacy](#privacy)
 
 <br>
 
