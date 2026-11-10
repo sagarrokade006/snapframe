@@ -40,6 +40,9 @@ extension ShortcutAction {
         case .window: return "macwindow"
         case .fullscreen: return "display"
         case .selfTimer: return "timer"
+        case .scrolling: return "scroll"
+        case .text: return "text.viewfinder"
+        case .toggleDesktopIcons: return "eye.slash"
         }
     }
 }

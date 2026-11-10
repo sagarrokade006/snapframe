@@ -26,11 +26,15 @@ final class CaptureCoordinator {
         isBusy = true
         Task {
             defer { isBusy = false }
+            let cover = DesktopIconCover.shared
+            let hideForCapture = settings.hideIconsWhileCapturing && action != .toggleDesktopIcons && !cover.isVisible
+            if hideForCapture { await cover.show() }
             do {
                 try await run(action)
             } catch {
                 report(error)
             }
+            if hideForCapture { cover.hide() }
         }
     }
 
@@ -44,6 +48,12 @@ final class CaptureCoordinator {
             try await runOverlay(mode: .window, timer: 0)
         case .selfTimer:
             try await runOverlay(mode: .area, timer: settings.timerSeconds)
+        case .scrolling:
+            try await runOverlay(mode: .scrolling, timer: 0)
+        case .text:
+            try await runOverlay(mode: .text, timer: 0)
+        case .toggleDesktopIcons:
+            await DesktopIconCover.shared.toggle()
         case .fullscreen:
             if NSScreen.screens.count == 1, let id = NSScreen.screens.first?.displayID {
                 let shot = try await service.captureDisplay(id: id, options: options)
@@ -87,6 +97,17 @@ final class CaptureCoordinator {
     }
 
     private func captureTarget(_ outcome: OverlaySession.Outcome) async throws {
+        if case .area(let snapshot, let rect) = outcome.target {
+            if outcome.mode == .scrolling {
+                try await captureScrolling(snapshot: snapshot, rect: rect, copyOnly: outcome.copyOnly)
+                return
+            }
+            if outcome.mode == .text {
+                try await captureText(snapshot: snapshot, rect: rect)
+                return
+            }
+        }
+
         // A countdown means the screen is meant to have changed, so frozen pixels would be stale.
         let useFrozen = settings.freezeScreen && outcome.timer == 0
 
@@ -120,6 +141,53 @@ final class CaptureCoordinator {
             } else {
                 let shot = try await service.captureDisplay(id: snapshot.displayID, options: options)
                 try await deliver(shot.image, scale: shot.scale, modeName: "Fullscreen", copyOnly: outcome.copyOnly)
+            }
+        }
+    }
+
+    private func captureScrolling(snapshot: DisplaySnapshot, rect: CGRect, copyOnly: Bool) async throws {
+        let displayID = snapshot.displayID
+        let options = self.options
+        let service = self.service
+        let stitched = try await ScrollCaptureController.run(displayID: displayID, rect: rect) {
+            try await service.captureRegion(displayID: displayID, rect: rect, options: options)
+        }
+        if let stitched {
+            try await deliver(stitched.image, scale: stitched.scale, modeName: "Scrolling", copyOnly: copyOnly)
+        }
+    }
+
+    private func captureText(snapshot: DisplaySnapshot, rect: CGRect) async throws {
+        let image: CGImage
+        if settings.freezeScreen {
+            let crop = SelectionGeometry.pixelCrop(rect, scale: snapshot.scale, imageSize: CGSize(width: snapshot.image.width, height: snapshot.image.height))
+            guard let cropped = snapshot.image.cropping(to: crop) else { throw CaptureError.emptySelection }
+            image = cropped
+        } else {
+            image = try await service.captureRegion(displayID: snapshot.displayID, rect: rect, options: options).image
+        }
+
+        let content = await TextCapture.recognize(image, detectLanguage: settings.detectTextLanguage)
+        let text = TextComposer.compose(content.fragments, keepLineBreaks: settings.keepLineBreaks)
+        if let value = text.isEmpty ? content.codes.first : text {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(value, forType: .string)
+        }
+        if settings.playSound { NSSound(named: "Tink")?.play() }
+        TextResultController.shared.show(content)
+    }
+
+    /// Used by URL automation to capture exact coordinates without showing the overlay.
+    func captureRegion(_ rect: CGRect, displayIndex: Int) {
+        guard !isBusy, NSScreen.screens.indices.contains(displayIndex), let id = NSScreen.screens[displayIndex].displayID else { return }
+        isBusy = true
+        Task {
+            defer { isBusy = false }
+            do {
+                let shot = try await service.captureRegion(displayID: id, rect: rect, options: options)
+                try await deliver(shot.image, scale: shot.scale, modeName: "Area", copyOnly: false)
+            } catch {
+                report(error)
             }
         }
     }

@@ -49,7 +49,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        urls.forEach { AnnotateController.shared.open(fileURL: $0) }
+        for url in urls {
+            if url.scheme?.lowercased() == AutomationCommand.scheme {
+                perform(url)
+            } else {
+                AnnotateController.shared.open(fileURL: url)
+            }
+        }
+    }
+
+    /// Another app can open these links at any time, so nothing runs without the user's consent.
+    private func perform(_ url: URL) {
+        guard let command = AutomationCommand.parse(url), isAllowed(url) else { return }
+        switch command {
+        case .capture(let action): capture(action)
+        case .captureRegion(let rect, let display): coordinator.captureRegion(rect, displayIndex: display)
+        case .openHome: showHome()
+        case .openSettings: showSettings()
+        case .icons(let change):
+            let cover = DesktopIconCover.shared
+            Task {
+                switch change {
+                case .hide: await cover.show()
+                case .show: cover.hide()
+                case .toggle: await cover.toggle()
+                }
+            }
+        }
+    }
+
+    private func isAllowed(_ url: URL) -> Bool {
+        switch settings.automationPolicy {
+        case .never: return false
+        case .always: return true
+        case .ask: break
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = "An app wants to control Snapframe"
+        alert.informativeText = "Requested action: \(url.host ?? "unknown")"
+        alert.addButton(withTitle: "Allow Once")
+        alert.addButton(withTitle: "Always Allow")
+        alert.addButton(withTitle: "Don't Allow")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: return true
+        case .alertSecondButtonReturn:
+            settings.automationPolicy = .always
+            return true
+        default: return false
+        }
     }
 
     /// A menu-bar app has no Dock window, so opening it again brings up Home.
@@ -64,7 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Windows belonging to Snapframe are excluded from captures, but Home would still hide what's beneath it.
     private func capture(_ action: ShortcutAction) {
-        homeWindow?.orderOut(nil)
+        if action != .toggleDesktopIcons { homeWindow?.orderOut(nil) }
         coordinator.begin(action)
     }
 

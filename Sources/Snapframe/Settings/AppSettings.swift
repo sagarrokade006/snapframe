@@ -29,6 +29,10 @@ final class AppSettings: ObservableObject {
     @Published var libraryRetentionDays: Int { didSet { defaults.set(libraryRetentionDays, forKey: "libraryRetentionDays") } }
     @Published var openHomeAtLaunch: Bool { didSet { defaults.set(openHomeAtLaunch, forKey: "openHomeAtLaunch") } }
     @Published var onboardingCompleted: Bool { didSet { defaults.set(onboardingCompleted, forKey: "onboardingCompleted") } }
+    @Published var keepLineBreaks: Bool { didSet { defaults.set(keepLineBreaks, forKey: "keepLineBreaks") } }
+    @Published var detectTextLanguage: Bool { didSet { defaults.set(detectTextLanguage, forKey: "detectTextLanguage") } }
+    @Published var hideIconsWhileCapturing: Bool { didSet { defaults.set(hideIconsWhileCapturing, forKey: "hideIconsWhileCapturing") } }
+    @Published var automationPolicy: AutomationPolicy { didSet { defaults.set(automationPolicy.rawValue, forKey: "automationPolicy") } }
     @Published var shortcuts: [ShortcutAction: Shortcut] { didSet { saveShortcuts() } }
 
     /// Lets onboarding continue where it stopped after the restart macOS requires.
@@ -73,6 +77,8 @@ final class AppSettings: ObservableObject {
             "timerSeconds": 3,
             "libraryRetentionDays": 30,
             "openHomeAtLaunch": true,
+            "keepLineBreaks": true,
+            "detectTextLanguage": true,
         ])
 
         playSound = store.bool(forKey: "playSound")
@@ -92,17 +98,35 @@ final class AppSettings: ObservableObject {
         libraryRetentionDays = store.integer(forKey: "libraryRetentionDays")
         openHomeAtLaunch = store.bool(forKey: "openHomeAtLaunch")
         onboardingCompleted = store.bool(forKey: "onboardingCompleted")
+        keepLineBreaks = store.bool(forKey: "keepLineBreaks")
+        detectTextLanguage = store.bool(forKey: "detectTextLanguage")
+        hideIconsWhileCapturing = store.bool(forKey: "hideIconsWhileCapturing")
+        automationPolicy = AutomationPolicy(rawValue: store.string(forKey: "automationPolicy") ?? "") ?? .ask
         shortcuts = Self.loadShortcuts(from: store)
     }
 
+    /// Gives shortcuts to actions added since the last launch, without restoring ones the user cleared.
     private static func loadShortcuts(from store: UserDefaults) -> [ShortcutAction: Shortcut] {
-        if let data = store.data(forKey: "shortcuts"),
-           let saved = try? JSONDecoder().decode([String: Shortcut].self, from: data) {
-            return Dictionary(uniqueKeysWithValues: saved.compactMap { key, value in
-                ShortcutAction(rawValue: key).map { ($0, value) }
-            })
+        let everyAction = ShortcutAction.allCases.map(\.rawValue)
+        defer { store.set(everyAction, forKey: "shortcutActionsSeen") }
+
+        guard let data = store.data(forKey: "shortcuts"),
+              let saved = try? JSONDecoder().decode([String: Shortcut].self, from: data)
+        else {
+            return Dictionary(uniqueKeysWithValues: ShortcutAction.allCases.map { ($0, $0.defaultShortcut) })
         }
-        return Dictionary(uniqueKeysWithValues: ShortcutAction.allCases.map { ($0, $0.defaultShortcut) })
+
+        var result = Dictionary(uniqueKeysWithValues: saved.compactMap { key, value in
+            ShortcutAction(rawValue: key).map { ($0, value) }
+        })
+        let originalActions = ["allInOne", "area", "previousArea", "window", "fullscreen", "selfTimer"]
+        let seen = store.stringArray(forKey: "shortcutActionsSeen") ?? originalActions
+        for action in ShortcutAction.allCases where !seen.contains(action.rawValue) {
+            result[action] = action.defaultShortcut
+        }
+        let stored = Dictionary(uniqueKeysWithValues: result.map { ($0.key.rawValue, $0.value) })
+        store.set(try? JSONEncoder().encode(stored), forKey: "shortcuts")
+        return result
     }
 
     private func saveShortcuts() {

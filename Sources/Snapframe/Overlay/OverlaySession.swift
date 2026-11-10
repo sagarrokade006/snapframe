@@ -5,13 +5,15 @@ import SnapframeCore
 @MainActor
 final class OverlaySession {
     enum Mode: String, CaseIterable {
-        case area, window, fullscreen
+        case area, window, fullscreen, scrolling, text
 
         var title: String {
             switch self {
             case .area: return "Area"
             case .window: return "Window"
             case .fullscreen: return "Fullscreen"
+            case .scrolling: return "Scrolling"
+            case .text: return "Text"
             }
         }
 
@@ -20,6 +22,8 @@ final class OverlaySession {
             case .area: return "A"
             case .window: return "W"
             case .fullscreen: return "F"
+            case .scrolling: return "S"
+            case .text: return "O"
             }
         }
     }
@@ -134,7 +138,7 @@ final class OverlaySession {
 
     func setAspect(_ newAspect: CaptureAspect) {
         aspect = newAspect
-        if mode != .area { setMode(.area) }
+        if mode == .window || mode == .fullscreen { setMode(.area) }
         clearSelection()
         invalidate()
     }
@@ -199,7 +203,7 @@ final class OverlaySession {
             if let hoveredWindow { finish(target: .window(hoveredWindow)) }
         case .fullscreen:
             finish(target: .fullscreen(snapshot))
-        case .area:
+        case .area, .scrolling, .text:
             if isAdjusting, selectionDisplay == snapshot.displayID, let selection {
                 if let handle = SelectionGeometry.handle(at: point, in: selection, radius: 9) {
                     gesture = .resizing(handle)
@@ -288,6 +292,8 @@ final class OverlaySession {
         case 0: setMode(.area)
         case 13: setMode(.window)
         case 3: setMode(.fullscreen)
+        case 1: setMode(.scrolling)
+        case 31: setMode(.text)
         case 17: cycleTimer()
         case 8: if event.modifierFlags.contains(.command) { copyColorUnderCursor() }
         case 123: nudge(dx: -1, dy: 0, event)
@@ -311,7 +317,7 @@ final class OverlaySession {
 
     private func confirm() {
         switch mode {
-        case .area:
+        case .area, .scrolling, .text:
             if isAdjusting, let selection,
                let snapshot = environment.displays.first(where: { $0.displayID == selectionDisplay }) {
                 finish(target: .area(snapshot, selection))

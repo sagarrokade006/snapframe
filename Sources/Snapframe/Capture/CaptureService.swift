@@ -37,12 +37,14 @@ enum CaptureError: LocalizedError {
     case displayNotFound
     case windowNotFound
     case emptySelection
+    case nothingStitched
 
     var errorDescription: String? {
         switch self {
         case .displayNotFound: return "That display is no longer connected."
         case .windowNotFound: return "That window has closed."
         case .emptySelection: return "The selection is empty."
+        case .nothingStitched: return "Nothing scrolled. Try again and scroll the page, or select only the part that scrolls."
         }
     }
 }
@@ -71,7 +73,11 @@ final class CaptureService {
     }
 
     private func displayFilter(_ display: SCDisplay, content: SCShareableContent) -> SCContentFilter {
-        SCContentFilter(display: display, excludingApplications: ownApplications(in: content), exceptingWindows: [])
+        SCContentFilter(
+            display: display,
+            excludingApplications: ownApplications(in: content),
+            exceptingWindows: content.windows.filter { DesktopIconCover.shared.windowIDs.contains($0.windowID) }
+        )
     }
 
     private func capture(_ display: SCDisplay, content: SCShareableContent, options: CaptureOptions) async throws -> DisplaySnapshot {
@@ -188,7 +194,8 @@ final class CaptureService {
             throw CaptureError.displayNotFound
         }
 
-        let wallpaper = content.windows.filter { $0.windowLayer < 0 && $0.windowID != window.windowID }
+        let iconLevel = Int(CGWindowLevelForKey(.desktopIconWindow))
+        let wallpaper = content.windows.filter { $0.windowLayer < iconLevel && $0.windowID != window.windowID }
         let filter = SCContentFilter(display: display, including: wallpaper + [window])
         let scale = CGFloat(filter.pointPixelScale)
 

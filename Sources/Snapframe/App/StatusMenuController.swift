@@ -61,6 +61,7 @@ final class StatusMenuController: NSObject {
 struct PopoverView: View {
     @ObservedObject private var library = CaptureLibrary.shared
     @ObservedObject private var settings = AppSettings.shared
+    @ObservedObject private var iconCover = DesktopIconCover.shared
     @ObservedObject private var updates = UpdateController.shared
 
     var capture: (ShortcutAction) -> Void
@@ -113,6 +114,9 @@ struct PopoverView: View {
                 tile(.previousArea, "Previous")
                 tile(.selfTimer, "Timer")
                 tile(.allInOne, "All-In-One")
+                tile(.scrolling, "Scrolling")
+                tile(.text, "Text")
+                tile(.toggleDesktopIcons, iconCover.isVisible ? "Show Icons" : "Hide Icons")
             }
 
             HStack {

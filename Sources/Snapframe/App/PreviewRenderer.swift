@@ -94,7 +94,7 @@ enum PreviewRenderer {
             writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
         }
         let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
-        let release = AvailableRelease(version: AppVersion("1.3.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        let release = AvailableRelease(version: AppVersion("1.4.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
         UpdateController.shared.previewAvailable(release, phase: .available)
         writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
         UpdateController.shared.previewAvailable(release, phase: .installing)
@@ -110,6 +110,13 @@ enum PreviewRenderer {
         PreviewAnnotate.checkBurning(base: snapshot.image, scale: scale)
         await PreviewAnnotate.checkStoredEdit(base: snapshot.image, scale: scale)
         PreviewAnnotate.checkCanvas(base: snapshot.image, scale: scale)
+
+        PreviewSmart.checkStitching()
+        await PreviewSmart.checkRecognition(screen: snapshot)
+        writeHosted(TextResultCard(content: PreviewSmart.sampleResult(), close: {}, hovering: { _ in }), "60-text-result", CGSize(width: 440, height: 320), directory)
+        let textMode = session(.text)
+        textMode.mouseMoved(to: CGPoint(x: 640, y: 300), on: snapshot)
+        write(textMode, snapshot, "61-text-mode", directory)
 
         await checkOutput(snapshot: snapshot, directory: directory)
     }
@@ -138,6 +145,7 @@ enum PreviewRenderer {
         } catch {
             print("capture error: \(error)")
         }
+        await PreviewSmart.checkCover()
         HotKeyCenter.shared.register(Dictionary(uniqueKeysWithValues: ShortcutAction.allCases.map { ($0, $0.defaultShortcut) }))
         print("shortcuts refused: \(HotKeyCenter.shared.failed.count) of \(ShortcutAction.allCases.count)")
     }

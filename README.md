@@ -30,6 +30,10 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 - A preview card after every capture, and floating images that stay on top
 - An Annotate editor with arrows, shapes, text, counters, spotlight, redaction and backgrounds
 - Editable projects, password-protected PDFs and the macOS share sheet
+- Scrolling capture that stitches long pages and skips sidebars and fixed bars
+- On-device text recognition and QR code reading
+- Hide desktop icons, on demand or just while capturing
+- `snapframe://` links for scripts and launchers
 - Custom file names, PNG, JPEG or HEIC, and global shortcuts
 - In-app updates with a changelog
 
@@ -54,8 +58,19 @@ Later versions install from inside the app, and your settings and permissions st
 | Capture Window | ⌃⌥5 |
 | Capture Fullscreen | ⌃⌥3 |
 | Self-Timer | ⌃⌥T |
+| Scrolling Capture | ⌃⌥S |
+| Capture Text | ⌃⌥O |
+| Hide Desktop Icons | ⌃⌥D |
 
-In the overlay, press A, W or F to switch modes, T to cycle the timer, Return to confirm and Esc to cancel. Hold Shift for a square area or to include the wallpaper with a window. Hold Control to copy without saving. Hold Command to turn off edge snapping.
+In the overlay, press A, W, F, S or O to switch modes, T to cycle the timer, Return to confirm and Esc to cancel. Hold Shift for a square area or to include the wallpaper with a window. Hold Control to copy without saving. Hold Command to turn off edge snapping.
+
+## Automation
+
+Other apps can run Snapframe with links. Snapframe asks first unless you change this in Settings > General.
+
+`capture-area`, `capture-window`, `capture-fullscreen`, `capture-previous-area`, `self-timer`, `all-in-one`, `scrolling-capture`, `capture-text`, `hide-desktop-icons`, `show-desktop-icons`, `toggle-desktop-icons`, `open-home`, `open-settings`
+
+For example, `snapframe://capture-area?x=100&y=100&width=800&height=600&display=0` captures an exact area.
 
 ## Development
 

@@ -211,6 +211,14 @@ private struct GeneralPane: View {
                 ChoiceMenu(options: AfterCapture.allCases.map { ($0, $0.title) }, selection: $settings.afterCapture)
             }
         }
+        SettingsGroup(title: "Desktop") {
+            ToggleRow(title: "Hide desktop icons while capturing", detail: "Shows only your wallpaper in screenshots", isOn: $settings.hideIconsWhileCapturing)
+        }
+        SettingsGroup(title: "Automation") {
+            SettingRow(title: "Commands from other apps", detail: "Controls snapframe:// links from scripts and launchers") {
+                ChoiceMenu(options: AutomationPolicy.allCases.map { ($0, $0.title) }, selection: $settings.automationPolicy)
+            }
+        }
         SettingsGroup(title: "Self-timer") {
             SettingRow(title: "Default delay", detail: "Used by the Self-Timer action") {
                 ChoiceMenu(options: [3, 5, 10].map { ($0, "\($0) seconds") }, selection: $settings.timerSeconds)
@@ -246,6 +254,10 @@ private struct CapturePane: View {
             ToggleRow(title: "Show cursor", detail: "Include the pointer in captures", isOn: $settings.showCursor)
             ToggleRow(title: "Scale Retina to 1x", detail: "Save smaller images", isOn: $settings.scaleTo1x)
             ToggleRow(title: "Convert to sRGB", detail: "Consistent colors everywhere", isOn: $settings.convertToSRGB)
+        }
+        SettingsGroup(title: "Text recognition") {
+            ToggleRow(title: "Keep line breaks", detail: "Copy text with the same lines as the image", isOn: $settings.keepLineBreaks)
+            ToggleRow(title: "Detect language", detail: "Runs on this Mac", isOn: $settings.detectTextLanguage)
         }
         SettingsGroup(title: "Library") {
             SettingRow(title: "Auto-delete captures", detail: "Library copies only. Pinned captures and saved files are kept") {

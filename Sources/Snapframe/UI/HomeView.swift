@@ -20,6 +20,7 @@ struct HomeView: View {
     @ObservedObject private var library = CaptureLibrary.shared
     @ObservedObject private var settings = AppSettings.shared
     @ObservedObject private var updates = UpdateController.shared
+    @ObservedObject private var iconCover = DesktopIconCover.shared
 
     var onCapture: (ShortcutAction) -> Void
     var onSettings: () -> Void
@@ -75,6 +76,7 @@ struct HomeView: View {
                 }
             }
             navigationRow("Annotate Image…", "pencil.tip.crop.circle", count: nil, active: false) { AnnotateController.shared.chooseFile() }
+            navigationRow(iconCover.isVisible ? "Show Desktop Icons" : "Hide Desktop Icons", iconCover.isVisible ? "eye" : "eye.slash", count: nil, active: iconCover.isVisible) { onCapture(.toggleDesktopIcons) }
             navigationRow("Settings", "slider.horizontal.3", count: nil, active: false, action: onSettings)
 
             if !library.index.allTags.isEmpty {
@@ -189,6 +191,7 @@ struct HomeView: View {
                     filter("Area", value: "Area")
                     filter("Window", value: "Window")
                     filter("Fullscreen", value: "Fullscreen")
+                    filter("Scrolling", value: "Scrolling")
                 }
 
                 if visible.isEmpty {
@@ -220,8 +223,8 @@ struct HomeView: View {
             tile(.fullscreen, title: "Fullscreen")
             tile(.previousArea, title: "Previous Area")
             tile(.selfTimer, title: "Self-Timer")
-            soonTile("Scrolling", "arrow.up.and.down.text.horizontal")
-            soonTile("Capture Text", "text.viewfinder")
+            tile(.scrolling, title: "Scrolling")
+            tile(.text, title: "Capture Text")
             soonTile("Record", "record.circle")
         }
     }
