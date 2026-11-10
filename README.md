@@ -86,7 +86,8 @@
 | **Home and library** | Browse, search and filter everything you've captured |
 | **Tags and pins** | Group captures with tags, and pin the ones to keep |
 | **Auto-delete** | Clear older library copies after a period you choose |
-| **Preview card** | Copy, edit, float or reveal a capture the moment you take it |
+| **Preview card** | Copy, edit, float or reveal a capture the moment you take it, in a Classic or Hover Controls style |
+| **Floating pins** | Keep captures above every window to compare them, then resize them or make them see-through |
 | **Custom file names** | Build names from the date, time and capture type |
 | **Stays in step with Finder** | Delete a saved file and it leaves Home too |
 

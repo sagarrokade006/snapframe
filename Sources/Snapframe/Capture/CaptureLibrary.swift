@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import SnapframeCore
+import UniformTypeIdentifiers
 
 /// Keeps a private copy of every capture on this Mac, so Home works even for clipboard-only captures.
 @MainActor
@@ -160,6 +161,27 @@ final class CaptureLibrary: ObservableObject {
 
     func reveal(_ item: CaptureItem) {
         NSWorkspace.shared.activateFileViewerSelecting([existingFile(for: item)])
+    }
+
+    /// Saves a copy of the capture wherever the person chooses.
+    func saveCopy(_ item: CaptureItem) {
+        let source = existingFile(for: item)
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "\(item.name).\(source.pathExtension)"
+        panel.directoryURL = AppSettings.shared.exportDirectory
+        if let type = UTType(filenameExtension: source.pathExtension) { panel.allowedContentTypes = [type] }
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK, let destination = panel.url, destination.standardizedFileURL != source.standardizedFileURL else { return }
+        do {
+            let manager = FileManager.default
+            if manager.fileExists(atPath: destination.path) { try manager.removeItem(at: destination) }
+            try manager.copyItem(at: source, to: destination)
+        } catch {
+            let alert = NSAlert()
+            alert.messageText = "The capture could not be saved."
+            alert.informativeText = error.localizedDescription
+            alert.runModal()
+        }
     }
 
     /// Removes the library copy. A file already saved to the export folder is left alone.

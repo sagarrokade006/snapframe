@@ -86,6 +86,11 @@ enum PreviewRenderer {
         writeHosted(popover, "11-popover", NSHostingView(rootView: popover).fittingSize, directory)
         if let item = library.index.items.first {
             writeHosted(QuickAccessCard(item: item, message: "Saved to Desktop and copied", close: {}, hovering: { _ in }), "12-quick-access", CGSize(width: 356, height: 312), directory)
+            writeHosted(HoverQuickCard(item: item, message: "Saved to Desktop and copied", close: {}, hovering: { _ in }), "13-card-hover-rest", HoverQuickCard.size, directory)
+            writeHosted(HoverQuickCard(item: item, message: "", close: {}, hovering: { _ in }, showsControls: true), "14-card-hover", HoverQuickCard.size, directory)
+            var video = item
+            video.kind = CaptureItem.recordingKind
+            writeHosted(HoverQuickCard(item: video, message: "", close: {}, hovering: { _ in }, showsControls: true), "15-card-hover-video", HoverQuickCard.size, directory)
         }
         let settingsSize = CGSize(width: 1060, height: 700)
         for (index, pane) in SettingsPane.allCases.enumerated() {
@@ -95,7 +100,7 @@ enum PreviewRenderer {
             writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
         }
         let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
-        let release = AvailableRelease(version: AppVersion("1.7.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        let release = AvailableRelease(version: AppVersion("1.8.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
         UpdateController.shared.previewAvailable(release, phase: .available)
         writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
         UpdateController.shared.previewAvailable(release, phase: .installing)

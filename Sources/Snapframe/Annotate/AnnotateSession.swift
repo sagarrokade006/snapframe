@@ -344,6 +344,18 @@ final class AnnotateSession: ObservableObject {
 }
 
 enum ShareSheet {
+    /// For floating panels, which never become the key window.
+    @MainActor
+    static func show(_ url: URL, in window: NSWindow) {
+        guard let view = window.contentView else { return }
+        let location = view.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+        NSSharingServicePicker(items: [url]).show(
+            relativeTo: CGRect(origin: location, size: CGSize(width: 1, height: 1)),
+            of: view,
+            preferredEdge: .maxY
+        )
+    }
+
     @MainActor
     static func show(_ url: URL) {
         guard let window = NSApp.keyWindow, let view = window.contentView else { return }

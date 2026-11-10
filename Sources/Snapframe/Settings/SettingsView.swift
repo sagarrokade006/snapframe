@@ -203,6 +203,8 @@ private struct ChoiceMenu<Value: Hashable>: View {
 
 private struct AppearancePane: View {
     @ObservedObject private var engine = ThemeEngine.shared
+    @ObservedObject private var settings = AppSettings.shared
+    @ObservedObject private var library = CaptureLibrary.shared
 
     private func miniature(_ palette: ThemePalette) -> some View {
         HStack(spacing: 5) {
@@ -260,6 +262,43 @@ private struct AppearancePane: View {
             }
             .padding(14)
         }
+        SettingsGroup(title: "Preview card") {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 12) {
+                    ForEach(QuickCardStyle.allCases, id: \.self) { style in
+                        Button {
+                            settings.quickCardStyle = style
+                        } label: {
+                            VStack(spacing: 6) {
+                                QuickCardSample(style: style)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .stroke(settings.quickCardStyle == style ? Color.snapAccentText : Color.snapLine, lineWidth: settings.quickCardStyle == style ? 2 : 1)
+                                    )
+                                Text(style.title).font(.system(size: 13, weight: .medium))
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(style.title)
+                        .accessibilityAddTraits(settings.quickCardStyle == style ? .isSelected : [])
+                    }
+                }
+                HStack {
+                    Text(settings.quickCardStyle.detail).font(.system(size: 13)).foregroundStyle(Color.snapMuted)
+                    Spacer()
+                    Button("Try It") {
+                        if let item = library.index.items.first {
+                            QuickAccessController.shared.show(item, message: "This is your preview card")
+                        }
+                    }
+                    .buttonStyle(QuietButtonStyle())
+                    .disabled(library.index.items.isEmpty)
+                }
+            }
+            .padding(14)
+        }
         SettingsGroup(title: "Accent") {
             HStack(spacing: 12) {
                 ForEach(ThemeAccent.allCases, id: \.self) { accent in
@@ -283,6 +322,90 @@ private struct AppearancePane: View {
             }
             .padding(14)
         }
+    }
+}
+
+/// A small drawing of each preview card style, so the choice can be seen before it is made.
+private struct QuickCardSample: View {
+    let style: QuickCardStyle
+
+    private var capture: some View {
+        ZStack {
+            LinearGradient(colors: [Color(hex: 0xFF8A63), Color(hex: 0xC7A6E8)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            VStack(alignment: .leading, spacing: 5) {
+                Capsule().fill(Color(hex: 0xFF6B3D)).frame(width: 46, height: 7)
+                ForEach([110, 84, 98], id: \.self) { width in
+                    Capsule().fill(Color(hex: 0xB9BCC4)).frame(width: CGFloat(width), height: 4)
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color(hex: 0xF4F3F0), in: RoundedRectangle(cornerRadius: 6))
+            .padding(14)
+        }
+    }
+
+    private func dot(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 9, weight: .semibold))
+            .frame(width: 22, height: 22)
+            .foregroundStyle(Color.snapOnText)
+            .background(Color.snapText, in: Circle())
+    }
+
+    private func pill(_ title: String) -> some View {
+        Text(title)
+            .font(.system(size: 10, weight: .semibold))
+            .padding(.horizontal, 11)
+            .frame(height: 20)
+            .foregroundStyle(Color.snapOnText)
+            .background(Color.snapText, in: Capsule())
+    }
+
+    var body: some View {
+        Group {
+            if style == .hover {
+                ZStack {
+                    capture.blur(radius: 3)
+                    Color.snapGround.opacity(0.55)
+                    VStack(spacing: 5) {
+                        pill("Copy")
+                        pill("Save")
+                    }
+                    VStack {
+                        HStack {
+                            dot("xmark")
+                            Spacer()
+                            dot("pip")
+                        }
+                        Spacer()
+                        HStack {
+                            dot("pencil.tip.crop.circle")
+                            Spacer()
+                            dot("square.and.arrow.up")
+                        }
+                    }
+                    .padding(7)
+                }
+            } else {
+                VStack(spacing: 0) {
+                    capture
+                    HStack(spacing: 0) {
+                        ForEach([("doc.on.doc", "Copy"), ("pencil.tip.crop.circle", "Edit"), ("pip", "Float"), ("folder", "Reveal"), ("xmark", "Close")], id: \.1) { entry in
+                            VStack(spacing: 2) {
+                                Image(systemName: entry.0).font(.system(size: 10))
+                                Text(entry.1).font(.system(size: 9))
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .frame(height: 38)
+                    .background(Color.snapSidebar)
+                }
+            }
+        }
+        .frame(height: 158)
+        .clipped()
     }
 }
 

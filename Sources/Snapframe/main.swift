@@ -33,6 +33,8 @@ if let flag = CommandLine.arguments.firstIndex(of: "--studio-check"), CommandLin
         case "showcase": await PreviewStudio.showcase(directory: directory)
         case "themes": await PreviewStudio.themes(directory: directory)
         case "library": await PreviewStudio.libraryCheck(directory: directory)
+        case "card": await PreviewStudio.cardCheck(directory: directory)
+        case "pin": await PreviewStudio.pinCheck(directory: directory)
         default: await PreviewStudio.real(rect: CGRect(x: 200, y: 180, width: 880, height: 640), seconds: 4, directory: directory)
         }
         exit(0)

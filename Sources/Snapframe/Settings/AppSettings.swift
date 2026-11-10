@@ -33,6 +33,7 @@ final class AppSettings: ObservableObject {
     @Published var detectTextLanguage: Bool { didSet { defaults.set(detectTextLanguage, forKey: "detectTextLanguage") } }
     @Published var hideIconsWhileCapturing: Bool { didSet { defaults.set(hideIconsWhileCapturing, forKey: "hideIconsWhileCapturing") } }
     @Published var automationPolicy: AutomationPolicy { didSet { defaults.set(automationPolicy.rawValue, forKey: "automationPolicy") } }
+    @Published var quickCardStyle: QuickCardStyle { didSet { defaults.set(quickCardStyle.rawValue, forKey: "quickCardStyle") } }
     @Published var savedBackgrounds: [CanvasFill] { didSet { defaults.set(try? JSONEncoder().encode(savedBackgrounds), forKey: "savedBackgrounds") } }
     @Published var recordMode: RecordMode { didSet { defaults.set(recordMode.rawValue, forKey: "recordMode") } }
     @Published var recordMicrophone: Bool { didSet { defaults.set(recordMicrophone, forKey: "recordMicrophone") } }
@@ -115,6 +116,7 @@ final class AppSettings: ObservableObject {
         keepLineBreaks = store.bool(forKey: "keepLineBreaks")
         detectTextLanguage = store.bool(forKey: "detectTextLanguage")
         hideIconsWhileCapturing = store.bool(forKey: "hideIconsWhileCapturing")
+        quickCardStyle = QuickCardStyle(rawValue: store.string(forKey: "quickCardStyle") ?? "") ?? .classic
         savedBackgrounds = store.data(forKey: "savedBackgrounds").flatMap { try? JSONDecoder().decode([CanvasFill].self, from: $0) } ?? []
         recordMode = RecordMode(rawValue: store.string(forKey: "recordMode") ?? "") ?? (store.bool(forKey: "recordOutputGIF") ? .gif : .video)
         recordMicrophone = store.bool(forKey: "recordMicrophone")

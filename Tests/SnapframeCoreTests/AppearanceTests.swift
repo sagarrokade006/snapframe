@@ -46,6 +46,47 @@ final class ThemeTests: XCTestCase {
     }
 }
 
+final class QuickCardStyleTests: XCTestCase {
+    func testEveryStyleIsNamedAndDescribed() {
+        XCTAssertEqual(QuickCardStyle.allCases.count, 2)
+        for style in QuickCardStyle.allCases {
+            XCTAssertFalse(style.title.isEmpty)
+            XCTAssertFalse(style.detail.isEmpty)
+        }
+    }
+
+    func testStoredValuesStayStable() {
+        XCTAssertEqual(QuickCardStyle(rawValue: "classic"), .classic)
+        XCTAssertEqual(QuickCardStyle(rawValue: "hover"), .hover)
+    }
+}
+
+final class PinSizingTests: XCTestCase {
+    private let start = CGSize(width: 400, height: 200)
+    private let room = CGSize(width: 2000, height: 1000)
+
+    func testDraggingKeepsTheShape() {
+        XCTAssertEqual(PinSizing.resized(from: start, dragX: 200, dragY: 0, limit: room), CGSize(width: 600, height: 300))
+    }
+
+    func testTheLargerDragWins() {
+        XCTAssertEqual(PinSizing.resized(from: start, dragX: 40, dragY: 100, limit: room), CGSize(width: 600, height: 300))
+    }
+
+    func testStopsAtTheSmallestSize() {
+        XCTAssertEqual(PinSizing.resized(from: start, dragX: -5000, dragY: -5000, limit: room), CGSize(width: 180, height: 90))
+    }
+
+    func testStopsAtTheScreenEdge() {
+        XCTAssertEqual(PinSizing.resized(from: start, dragX: 9000, dragY: 0, limit: CGSize(width: 800, height: 300)), CGSize(width: 600, height: 300))
+    }
+
+    func testPinsCannotDisappear() {
+        XCTAssertGreaterThan(PinSizing.opacityRange.lowerBound, 0)
+        XCTAssertEqual(PinSizing.opacityRange.upperBound, 1)
+    }
+}
+
 final class BackgroundTests: XCTestCase {
     func testCatalogSizes() {
         XCTAssertEqual(BackgroundCatalog.brandSolids.count, 8)

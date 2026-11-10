@@ -65,6 +65,41 @@ public enum ThemeAccent: String, CaseIterable, Codable, Sendable {
     }
 }
 
+/// Sizes for a floating pin, which always keeps the shape of its image.
+public enum PinSizing {
+    public static let minimumSize = CGSize(width: 180, height: 90)
+    public static let opacityRange: ClosedRange<Double> = 0.25...1
+
+    /// The new size after dragging the corner. `dragY` is positive when moving down.
+    public static func resized(from size: CGSize, dragX: CGFloat, dragY: CGFloat, limit: CGSize) -> CGSize {
+        guard size.width > 0, size.height > 0 else { return size }
+        let smallest = max(minimumSize.width / size.width, minimumSize.height / size.height)
+        let largest = min(limit.width / size.width, limit.height / size.height)
+        let wanted = max((size.width + dragX) / size.width, (size.height + dragY) / size.height)
+        let scale = min(max(wanted, smallest), largest)
+        return CGSize(width: (size.width * scale).rounded(), height: (size.height * scale).rounded())
+    }
+}
+
+/// How the preview card looks after a capture.
+public enum QuickCardStyle: String, CaseIterable, Codable, Sendable {
+    case classic, hover
+
+    public var title: String {
+        switch self {
+        case .classic: return "Classic"
+        case .hover: return "Hover Controls"
+        }
+    }
+
+    public var detail: String {
+        switch self {
+        case .classic: return "Buttons with labels, always visible below the capture."
+        case .hover: return "A clean preview. Controls appear when you point at it."
+        }
+    }
+}
+
 public struct ThemePalette: Equatable, Sendable {
     public var isDark: Bool
     public var ground: UInt32

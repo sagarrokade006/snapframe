@@ -201,7 +201,7 @@ enum PreviewStudio {
         }
     }
 
-    private static func captureWindow(_ name: String, directory: URL) async {
+    private static func captureWindow(_ name: String, directory: URL, minimumWidth: CGFloat = 1000) async {
         let content: SCShareableContent
         do {
             content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
@@ -209,7 +209,7 @@ enum PreviewStudio {
             print("studio: listing failed for \(name): \(error)")
             return
         }
-        guard let window = content.windows.first(where: { $0.owningApplication?.processID == getpid() && $0.frame.width > 1000 }) else {
+        guard let window = content.windows.first(where: { $0.owningApplication?.processID == getpid() && $0.frame.width > minimumWidth }) else {
             print("studio: window not found for \(name), \(content.windows.filter { $0.owningApplication?.processID == getpid() }.map(\.frame))")
             return
         }
@@ -292,6 +292,65 @@ enum PreviewStudio {
         session.changed()
         await wait(1)
         await captureWindow("theme-linear", directory: directory)
+    }
+
+    /// Shows the hover card in a real panel, using a sample image.
+    @MainActor
+    static func cardCheck(directory: URL) async {
+        CaptureLibrary.overrideDirectory = directory.appendingPathComponent("card-library", isDirectory: true)
+        try? FileManager.default.removeItem(at: CaptureLibrary.overrideDirectory!)
+        ThemeEngine.shared.start()
+        guard let item = await CaptureLibrary.shared.add(image: PreviewRenderer.syntheticScreen(), scale: 2, kind: "Area", name: "Sample", formatTitle: "PNG", savedURL: nil) else { return }
+        let panel = KeylessPanel(size: HoverQuickCard.size)
+        panel.level = .statusBar
+        panel.contentView = FirstMouseHostingView(rootView: HoverQuickCard(item: item, message: "", close: {}, hovering: { _ in }, showsControls: true))
+        panel.setFrameOrigin(CGPoint(x: 80, y: 80))
+        panel.orderFrontRegardless()
+        await wait(1)
+        await captureWindow("card", directory: directory, minimumWidth: 300)
+    }
+
+    /// Drives a real pin's resize handle with scripted drags, then shows it see-through.
+    @MainActor
+    static func pinCheck(directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        ThemeEngine.shared.start()
+        let image = NSImage(cgImage: PreviewRenderer.syntheticScreen(), size: CGSize(width: 480, height: 300))
+        let panel = KeylessPanel(size: CGSize(width: 480, height: 300))
+        panel.level = .floating
+        panel.isMovableByWindowBackground = true
+        panel.contentView = FirstMouseHostingView(rootView: PinnedImageView(image: image, close: {}, showsControls: true, startingOpacity: 0.45))
+        panel.setFrameOrigin(CGPoint(x: 120, y: 200))
+        panel.orderFrontRegardless()
+        await wait(1)
+        await captureWindow("pin", directory: directory, minimumWidth: 300)
+
+        let top = panel.frame.maxY, left = panel.frame.minX
+        func drag(to point: CGPoint) {
+            let handle = PinResizeHandle()
+            panel.contentView?.addSubview(handle)
+            var points = [CGPoint(x: 1000, y: 500), point]
+            handle.pointer = { points.count > 1 ? points.removeFirst() : points[0] }
+            func event(_ type: NSEvent.EventType) -> NSEvent {
+                NSEvent.mouseEvent(with: type, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: panel.windowNumber, context: nil, eventNumber: 0, clickCount: 1, pressure: 1)!
+            }
+            NSApp.postEvent(event(.leftMouseDragged), atStart: false)
+            NSApp.postEvent(event(.leftMouseUp), atStart: false)
+            handle.mouseDown(with: event(.leftMouseDown))
+            handle.removeFromSuperview()
+        }
+        func report(_ name: String, _ passed: Bool) {
+            let frame = panel.frame
+            let anchored = abs(frame.maxY - top) < 1 && abs(frame.minX - left) < 1
+            let shape = abs(frame.width / frame.height - 1.6) < 0.02
+            print("\(passed && anchored && shape ? "ok" : "FAIL") \(name) \(frame.size)")
+        }
+        drag(to: CGPoint(x: 1240, y: 500))
+        report("grows, keeps its shape, stops at the screen edge", panel.frame.width > 480 && panel.frame.minY >= (panel.screen?.visibleFrame.minY ?? 0))
+        drag(to: CGPoint(x: 0, y: 900))
+        report("stops at the smallest size", panel.frame.width == 180)
+        await wait(0.3)
+        print("ok handle does not move the window \(!PinResizeHandle().mouseDownCanMoveWindow)")
     }
 
     /// Exercises the real library against real files on disk.
