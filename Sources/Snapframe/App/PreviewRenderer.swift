@@ -94,7 +94,7 @@ enum PreviewRenderer {
             writeHosted(OnboardingView(initialStep: step, finish: {}, later: {}), "3\(step)-onboarding", CGSize(width: 920, height: 580), directory)
         }
         let notes = "## Changelog\n\n- Added a Home window with your recent captures\n- New: tags and timed auto-delete\n- Improved capture overlay\n- Fixed: shortcuts after a restart"
-        let release = AvailableRelease(version: AppVersion("1.5.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
+        let release = AvailableRelease(version: AppVersion("1.6.0")!, notes: notes, downloadURL: URL(string: "https://github.com")!, size: 3_200_000)
         UpdateController.shared.previewAvailable(release, phase: .available)
         writeHosted(UpdateView(close: {}), "40-update-available", CGSize(width: 720, height: 620), directory)
         UpdateController.shared.previewAvailable(release, phase: .installing)
@@ -215,7 +215,7 @@ enum PreviewRenderer {
         }
     }
 
-    private static func syntheticScreen() -> CGImage {
+    static func syntheticScreen() -> CGImage {
         let width = Int(size.width * scale)
         let height = Int(size.height * scale)
         let context = CGContext(

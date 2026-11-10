@@ -95,8 +95,14 @@ struct QuickAccessCard: View {
             .padding(.bottom, 4)
 
             HStack(spacing: 4) {
-                quick("Copy", "doc.on.doc") { library.copy(item) }
-                if item.isVideo {
+                if item.isStudio {
+                    quick("Open Editor", "film") { StudioController.shared.open(item) }
+                } else {
+                    quick("Copy", "doc.on.doc") { library.copy(item) }
+                }
+                if item.isStudio {
+                    EmptyView()
+                } else if item.isVideo {
                     quick("Play", "play.fill") { library.open(item) }
                     if item.canTrim {
                         quick("Trim", "timeline.selection") { TrimController.shared.open(item) }

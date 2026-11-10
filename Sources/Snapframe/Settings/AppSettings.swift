@@ -33,7 +33,7 @@ final class AppSettings: ObservableObject {
     @Published var detectTextLanguage: Bool { didSet { defaults.set(detectTextLanguage, forKey: "detectTextLanguage") } }
     @Published var hideIconsWhileCapturing: Bool { didSet { defaults.set(hideIconsWhileCapturing, forKey: "hideIconsWhileCapturing") } }
     @Published var automationPolicy: AutomationPolicy { didSet { defaults.set(automationPolicy.rawValue, forKey: "automationPolicy") } }
-    @Published var recordOutputGIF: Bool { didSet { defaults.set(recordOutputGIF, forKey: "recordOutputGIF") } }
+    @Published var recordMode: RecordMode { didSet { defaults.set(recordMode.rawValue, forKey: "recordMode") } }
     @Published var recordMicrophone: Bool { didSet { defaults.set(recordMicrophone, forKey: "recordMicrophone") } }
     @Published var recordSystemAudio: Bool { didSet { defaults.set(recordSystemAudio, forKey: "recordSystemAudio") } }
     @Published var recordCamera: Bool { didSet { defaults.set(recordCamera, forKey: "recordCamera") } }
@@ -114,7 +114,7 @@ final class AppSettings: ObservableObject {
         keepLineBreaks = store.bool(forKey: "keepLineBreaks")
         detectTextLanguage = store.bool(forKey: "detectTextLanguage")
         hideIconsWhileCapturing = store.bool(forKey: "hideIconsWhileCapturing")
-        recordOutputGIF = store.bool(forKey: "recordOutputGIF")
+        recordMode = RecordMode(rawValue: store.string(forKey: "recordMode") ?? "") ?? (store.bool(forKey: "recordOutputGIF") ? .gif : .video)
         recordMicrophone = store.bool(forKey: "recordMicrophone")
         recordSystemAudio = store.bool(forKey: "recordSystemAudio")
         recordCamera = store.bool(forKey: "recordCamera")

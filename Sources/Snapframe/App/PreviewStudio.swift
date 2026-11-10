@@ -1,0 +1,339 @@
+#if DEBUG
+import AppKit
+import AVFoundation
+import ScreenCaptureKit
+import SnapframeCore
+import SwiftUI
+
+/// Debug-only checks for Studio. Nothing here runs in release builds.
+enum PreviewStudio {
+    private static func pixelBuffer(width: Int, height: Int, draw: (CGContext) -> Void) -> CVPixelBuffer? {
+        var buffer: CVPixelBuffer?
+        CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, [kCVPixelBufferIOSurfacePropertiesKey as String: [:]] as CFDictionary, &buffer)
+        guard let buffer else { return nil }
+        CVPixelBufferLockBaseAddress(buffer, [])
+        defer { CVPixelBufferUnlockBaseAddress(buffer, []) }
+        guard let context = CGContext(
+            data: CVPixelBufferGetBaseAddress(buffer), width: width, height: height, bitsPerComponent: 8,
+            bytesPerRow: CVPixelBufferGetBytesPerRow(buffer), space: CGColorSpace(name: CGColorSpace.sRGB)!,
+            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+        ) else { return nil }
+        draw(context)
+        return buffer
+    }
+
+    private static func writeMovie(_ url: URL, width: Int, height: Int, seconds: Double, draw: @escaping (CGContext, Double) -> Void) async throws {
+        try? FileManager.default.removeItem(at: url)
+        let writer = try AVAssetWriter(outputURL: url, fileType: .mov)
+        let input = AVAssetWriterInput(mediaType: .video, outputSettings: [
+            AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: width, AVVideoHeightKey: height,
+        ])
+        input.expectsMediaDataInRealTime = false
+        let adaptor = AVAssetWriterInputPixelBufferAdaptor(assetWriterInput: input, sourcePixelBufferAttributes: nil)
+        writer.add(input)
+        writer.startWriting()
+        writer.startSession(atSourceTime: .zero)
+        for frame in 0..<Int(seconds * 30) {
+            while !input.isReadyForMoreMediaData { try await Task.sleep(nanoseconds: 2_000_000) }
+            let t = Double(frame) / 30
+            guard let buffer = pixelBuffer(width: width, height: height, draw: { draw($0, t) }) else { continue }
+            adaptor.append(buffer, withPresentationTime: CMTime(value: CMTimeValue(frame), timescale: 30))
+        }
+        input.markAsFinished()
+        await writer.finishWriting()
+        if let error = writer.error { throw error }
+    }
+
+    private static func export(_ project: StudioProject, package: URL, to destination: URL, maximumHeight: Int = 0) async throws {
+        try? FileManager.default.removeItem(at: destination)
+        StudioRenderState.shared.project = project
+        let built = try await StudioComposition.build(project: project, package: package, maximumHeight: maximumHeight)
+        guard let session = AVAssetExportSession(asset: built.composition, presetName: AVAssetExportPresetHighestQuality) else { throw RecordingError.nothingRecorded }
+        session.videoComposition = built.video
+        session.audioMix = built.audio
+        session.outputURL = destination
+        session.outputFileType = .mp4
+        await session.export()
+        if session.status != .completed { throw session.error ?? RecordingError.nothingRecorded }
+    }
+
+    private static func describe(_ url: URL) async -> String {
+        let asset = AVURLAsset(url: url)
+        let duration = (try? await asset.load(.duration))?.seconds ?? -1
+        let track = try? await asset.loadTracks(withMediaType: .video).first
+        let size = (try? await track?.load(.naturalSize)) ?? .zero
+        return String(format: "%.2fs %dx%d", duration, Int(size.width), Int(size.height))
+    }
+
+    private static func frames(of url: URL, at times: [Double], directory: URL, prefix: String) async {
+        let generator = AVAssetImageGenerator(asset: AVURLAsset(url: url))
+        generator.requestedTimeToleranceBefore = .zero
+        generator.requestedTimeToleranceAfter = .zero
+        generator.maximumSize = CGSize(width: 1100, height: 1100)
+        for time in times {
+            guard let image = try? await generator.image(at: CMTime(seconds: time, preferredTimescale: 600)).image else {
+                print("studio: no frame at \(time)")
+                continue
+            }
+            let bitmap = NSBitmapImageRep(cgImage: image)
+            try? bitmap.representation(using: .png, properties: [:])?.write(to: directory.appendingPathComponent("\(prefix)-\(String(format: "%.1f", time)).png"))
+        }
+    }
+
+    /// A synthetic project with every layer on, exported through the real compositor.
+    static func synthetic(directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        do {
+            let package = directory.appendingPathComponent("sample.\(StudioProject.packageExtension)", isDirectory: true)
+            try? FileManager.default.removeItem(at: package)
+            try FileManager.default.createDirectory(at: package, withIntermediateDirectories: true)
+
+            let width = 1600, height = 1000
+            try await writeMovie(package.appendingPathComponent(StudioProject.screenFile), width: width, height: height, seconds: 8) { c, t in
+                c.setFillColor(CGColor(gray: 0.93, alpha: 1))
+                c.fill(CGRect(x: 0, y: 0, width: width, height: height))
+                c.setFillColor(CGColor(gray: 0.72, alpha: 1))
+                for x in stride(from: 0, to: width, by: 100) { c.fill(CGRect(x: x, y: 0, width: 2, height: height)) }
+                for y in stride(from: 0, to: height, by: 100) { c.fill(CGRect(x: 0, y: y, width: width, height: 2)) }
+                // Red marks the top-left corner, so a flipped frame is obvious.
+                c.setFillColor(CGColor(srgbRed: 0.9, green: 0.1, blue: 0.1, alpha: 1))
+                c.fill(CGRect(x: 0, y: height - 120, width: 120, height: 120))
+                c.setFillColor(CGColor(srgbRed: 0.1, green: 0.4, blue: 0.9, alpha: 1))
+                c.fill(CGRect(x: 200 + t * 120, y: 400, width: 160, height: 160))
+            }
+            try await writeMovie(package.appendingPathComponent(StudioProject.cameraFile), width: 640, height: 480, seconds: 8) { c, t in
+                c.setFillColor(CGColor(srgbRed: 0.2, green: 0.7, blue: 0.5, alpha: 1))
+                c.fill(CGRect(x: 0, y: 0, width: 640, height: 480))
+                c.setFillColor(CGColor(gray: 1, alpha: 1))
+                c.fillEllipse(in: CGRect(x: 240, y: 160, width: 160, height: 160))
+            }
+
+            var project = StudioProject(name: "Sample", duration: 8, pixelWidth: width, pixelHeight: height, scale: 2)
+            project.isComplete = true
+            project.hasCamera = true
+            for step in 0...480 {
+                let t = Double(step) / 60
+                project.mouse.append(MouseSample(t: t, x: 0.2 + t / 8 * 0.5, y: 0.3 + 0.1 * sin(t)))
+            }
+            project.clicks = [ClickEvent(t: 2, x: 0.3, y: 0.35)]
+            project.keys = [KeyEvent(t: 3.2, parts: ["⌘", "K"])]
+            project.zooms = SmartZoom.analyze(clicks: project.clicks, mouse: project.mouse, duration: 8)
+            print("studio: zooms \(project.zooms.map { String(format: "%.1f-%.1f @%.1f", $0.start, $0.end, $0.level) })")
+            StudioPackage.save(project, to: package)
+
+            let plain = directory.appendingPathComponent("sample.mp4")
+            try await export(project, package: package, to: plain)
+            print("studio: full \(await describe(plain))")
+            await frames(of: plain, at: [0.5, 2.2, 3.5, 7.5], directory: directory, prefix: "full")
+
+            // A cut in the middle, a different look, and a smaller size.
+            var edited = project
+            edited.split(atTimeline: 4)
+            edited.split(atTimeline: 6)
+            edited.deleteClip(id: edited.clips[1].id)
+            edited.appearance.canvas.fill = .color(0xC9694A)
+            edited.appearance.cursorStyle = .ring
+            edited.appearance.cameraCorner = .topLeft
+            let cut = directory.appendingPathComponent("edited.mp4")
+            try await export(edited, package: package, to: cut, maximumHeight: 720)
+            print("studio: edited \(await describe(cut)) (expected 6.00s at 720 tall)")
+            await frames(of: cut, at: [2.2, 5], directory: directory, prefix: "edited")
+
+            print("studio: reloaded matches \(StudioPackage.load(package) == project)")
+        } catch {
+            print("studio: FAILED \(error)")
+        }
+    }
+
+    /// Real screen content and a real cursor log, without a window in the way.
+    static func real(rect: CGRect, seconds: Double, directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        do {
+            let package = directory.appendingPathComponent("real.\(StudioProject.packageExtension)", isDirectory: true)
+            try? FileManager.default.removeItem(at: package)
+            try FileManager.default.createDirectory(at: package, withIntermediateDirectories: true)
+            let movie = package.appendingPathComponent(StudioProject.screenFile)
+
+            let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            guard let id = NSScreen.main?.displayID, let display = content.displays.first(where: { $0.displayID == id }) else { return }
+            let filter = SCContentFilter(display: display, excludingApplications: [], exceptingWindows: [])
+            let scale = CGFloat(filter.pointPixelScale)
+            let size = RecordingFormat.outputSize(width: Int(rect.width * scale), height: Int(rect.height * scale), maximumHeight: 0)
+
+            let configuration = SCStreamConfiguration()
+            configuration.sourceRect = rect
+            configuration.width = size.width
+            configuration.height = size.height
+            configuration.scalesToFit = true
+            configuration.minimumFrameInterval = CMTime(value: 1, timescale: 30)
+            configuration.queueDepth = 8
+            configuration.pixelFormat = kCVPixelFormatType_32BGRA
+            configuration.colorSpaceName = CGColorSpace.sRGB
+            configuration.showsCursor = false
+
+            let writer = try RecordingWriter(url: movie, width: size.width, height: size.height, framesPerSecond: 30, system: false, microphone: false)
+            let recorder = ScreenRecorder(writer: writer, filter: filter, configuration: configuration)
+            try await recorder.start(system: false, useMicrophone: false)
+
+            let height = NSScreen.main?.frame.height ?? 0
+            let region = CGRect(x: rect.minX, y: height - rect.maxY, width: rect.width, height: rect.height)
+            let tracker = await StudioTracker(region: region, elapsed: { writer.elapsed }, isPaused: { false }, autosave: {})
+            await tracker.start()
+            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            await tracker.stop()
+            await recorder.stop()
+            try await writer.finish()
+
+            var project = StudioProject(name: "Real", duration: (try await AVURLAsset(url: movie).load(.duration)).seconds, pixelWidth: size.width, pixelHeight: size.height, scale: Double(scale))
+            project.mouse = await tracker.mouse
+            project.windows = await tracker.windows
+            project.isComplete = true
+            project.zooms = [ZoomSegment(start: 1, end: project.duration - 0.5, level: 1.8)]
+            StudioPackage.save(project, to: package)
+            print("studio: real \(await describe(movie)), \(project.mouse.count) mouse samples, \(project.windows.count) window samples")
+
+            let output = directory.appendingPathComponent("real.mp4")
+            try await export(project, package: package, to: output)
+            print("studio: real export \(await describe(output))")
+            await frames(of: output, at: [0.4, project.duration / 2], directory: directory, prefix: "real")
+        } catch {
+            print("studio: FAILED \(error)")
+        }
+    }
+
+    private static func captureWindow(_ name: String, directory: URL) async {
+        let content: SCShareableContent
+        do {
+            content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false)
+        } catch {
+            print("studio: listing failed for \(name): \(error)")
+            return
+        }
+        guard let window = content.windows.first(where: { $0.owningApplication?.processID == getpid() && $0.frame.width > 1000 }) else {
+            print("studio: window not found for \(name), \(content.windows.filter { $0.owningApplication?.processID == getpid() }.map(\.frame))")
+            return
+        }
+        let configuration = SCStreamConfiguration()
+        configuration.width = Int(window.frame.width) * 2
+        configuration.height = Int(window.frame.height) * 2
+        configuration.showsCursor = false
+        guard let image = try? await SCScreenshotManager.captureImage(contentFilter: SCContentFilter(desktopIndependentWindow: window), configuration: configuration) else {
+            print("studio: capture failed for \(name)")
+            return
+        }
+        try? NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])?.write(to: directory.appendingPathComponent("window-\(name).png"))
+    }
+
+    /// A tidy sample project for the website and README.
+    @MainActor
+    static func showcase(directory: URL) async {
+        do {
+            let package = directory.appendingPathComponent("showcase.\(StudioProject.packageExtension)", isDirectory: true)
+            try? FileManager.default.removeItem(at: package)
+            try FileManager.default.createDirectory(at: package, withIntermediateDirectories: true)
+            let screen = PreviewRenderer.syntheticScreen()
+            let width = 2560, height = 1600
+            try await writeMovie(package.appendingPathComponent(StudioProject.screenFile), width: width, height: height, seconds: 12) { c, _ in
+                c.draw(screen, in: CGRect(x: 0, y: 0, width: width, height: height))
+            }
+            var project = StudioProject(name: "Product walkthrough", duration: 12, pixelWidth: width, pixelHeight: height, scale: 2)
+            project.isComplete = true
+            for step in 0...720 {
+                let t = Double(step) / 60
+                project.mouse.append(MouseSample(t: t, x: 0.35 + 0.22 * sin(t * 0.5), y: 0.42 + 0.12 * cos(t * 0.7)))
+            }
+            project.clicks = [ClickEvent(t: 2.6, x: 0.46, y: 0.5), ClickEvent(t: 9, x: 0.3, y: 0.34)]
+            project.keys = [KeyEvent(t: 3.1, parts: ["⌘", "⇧", "4"])]
+            project.appearance.canvas.fill = .gradient(0xFF8A63, 0xC7A6E8)
+            project.zooms = SmartZoom.analyze(clicks: project.clicks, mouse: project.mouse, duration: 12)
+            StudioPackage.save(project, to: package)
+
+            StudioController.shared.open(package: package)
+            guard let session = StudioController.shared.session else { return }
+            await wait(2)
+            session.tab = .canvas
+            session.seek(to: 3.4)
+            await wait(1.5)
+            await captureWindow("showcase", directory: directory)
+        } catch {
+            print("studio: FAILED \(error)")
+        }
+    }
+
+    private static func wait(_ seconds: Double) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }
+
+    /// Drives a real editor window: preview, a style change, a cut, undo and playback.
+    @MainActor
+    static func window(directory: URL) async {
+        setvbuf(stdout, nil, _IOLBF, 0)
+        let original = directory.appendingPathComponent("sample.\(StudioProject.packageExtension)", isDirectory: true)
+        let package = directory.appendingPathComponent("window.\(StudioProject.packageExtension)", isDirectory: true)
+        try? FileManager.default.removeItem(at: package)
+        try? FileManager.default.copyItem(at: original, to: package)
+        StudioController.shared.open(package: package)
+        guard let session = StudioController.shared.session else {
+            print("studio: editor did not open")
+            return
+        }
+        await wait(2)
+        session.seek(to: 2.2)
+        await wait(1)
+        await captureWindow("1-preview", directory: directory)
+
+        session.project.appearance.canvas.fill = .color(0x6A4C74)
+        session.project.appearance.cameraCorner = .topRight
+        session.changed()
+        await wait(1)
+        await captureWindow("2-styled", directory: directory)
+
+        session.seek(to: 4)
+        session.splitAtPlayhead()
+        await wait(1)
+        session.selectedClip = session.project.clips[1].id
+        session.deleteSelectedClip()
+        await wait(1)
+        print("studio: after cut \(session.project.clips.count) clips, \(session.project.editedDuration)s, item \(session.player.currentItem?.duration.seconds ?? -1)s")
+        await captureWindow("3-cut", directory: directory)
+
+        session.undo()
+        await wait(1)
+        print("studio: after undo \(session.project.clips.count) clips, item \(session.player.currentItem?.duration.seconds ?? -1)s")
+
+        session.seek(to: 1)
+        await wait(0.5)
+        session.togglePlay()
+        await wait(1.5)
+        print("studio: playing, playhead \(session.playhead), error \(String(describing: session.player.currentItem?.error))")
+        session.togglePlay()
+        print("studio: saved edits match \(StudioPackage.load(package) == session.project)")
+    }
+
+    /// Lays out the editor for the given project, then saves it as an image.
+    static func editor(directory: URL) async {
+        let package = directory.appendingPathComponent("sample.\(StudioProject.packageExtension)", isDirectory: true)
+        guard var project = StudioPackage.load(package) else {
+            print("studio: run synthetic first")
+            return
+        }
+        project.split(atTimeline: 5)
+        let session = await StudioSession(project: project, package: package)
+        await session.load()
+        for tab in [StudioTab.zoom, .cursor, .canvas] {
+            await MainActor.run {
+                session.tab = tab
+                let host = NSHostingView(rootView: StudioView(session: session).environment(\.colorScheme, .dark))
+                host.frame = CGRect(x: 0, y: 0, width: 1280, height: 800)
+                let window = NSWindow(contentRect: host.frame, styleMask: [.borderless], backing: .buffered, defer: false)
+                window.appearance = NSAppearance(named: .darkAqua)
+                window.contentView = host
+                host.layoutSubtreeIfNeeded()
+                RunLoop.main.run(until: Date().addingTimeInterval(0.4))
+                guard let bitmap = host.bitmapImageRepForCachingDisplay(in: host.bounds) else { return }
+                host.cacheDisplay(in: host.bounds, to: bitmap)
+                try? bitmap.representation(using: .png, properties: [:])?.write(to: directory.appendingPathComponent("editor-\(tab.rawValue).png"))
+            }
+        }
+        await session.teardown()
+    }
+}
+#endif

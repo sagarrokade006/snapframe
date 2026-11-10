@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 import ScreenCaptureKit
 import SnapframeCore
 
@@ -170,7 +171,11 @@ final class CaptureCoordinator {
             return
         }
         guard let output = try await RecordingController.shared.run(displayID: displayID, rect: rect, showsCursor: true) else { return }
-        try await finishRecording(movie: output.movie, isGIF: output.isGIF, recovered: false)
+        if output.mode == .studio {
+            await finishStudio(package: output.movie.deletingLastPathComponent(), recovered: false, open: true)
+        } else {
+            try await finishRecording(movie: output.movie, isGIF: output.isGIF, recovered: false)
+        }
     }
 
     /// Turns a finished or rescued movie into a file in the export folder and a library entry.
@@ -208,12 +213,40 @@ final class CaptureCoordinator {
         QuickAccessController.shared.show(item, message: message)
     }
 
+    /// Turns a finished or rescued Studio recording into a project with automatic zooms.
+    private func finishStudio(package: URL, recovered: Bool, open: Bool) async {
+        let movie = package.appendingPathComponent(StudioProject.screenFile)
+        let duration = (try? await AVURLAsset(url: movie).load(.duration))?.seconds ?? 0
+        guard duration >= 0.5, var project = StudioPackage.load(package) else {
+            try? FileManager.default.removeItem(at: package)
+            if !recovered { showToast("The recording was too short to edit.", reveal: nil) }
+            return
+        }
+        project.duration = duration
+        project.clips = [StudioClip(start: 0, end: duration)]
+        project.zooms = SmartZoom.analyze(clicks: project.clicks, mouse: project.mouse, duration: duration)
+        project.isComplete = true
+        StudioPackage.save(project, to: package)
+
+        guard let poster = await RecordingExport.poster(of: movie),
+              let item = await library.add(image: poster, scale: 1, kind: CaptureItem.studioKind, name: project.name, formatTitle: "Studio", savedURL: package)
+        else { return }
+        if open {
+            StudioController.shared.open(item)
+        } else if recovered {
+            QuickAccessController.shared.show(item, message: "Studio recording recovered after an unexpected quit")
+        }
+    }
+
     /// Rescues recordings left behind by a crash or forced quit.
     func recoverRecordings() {
         guard !isBusy else { return }
         isBusy = true
         Task {
             defer { isBusy = false }
+            for package in StudioPackage.unfinished() {
+                await finishStudio(package: package, recovered: true, open: false)
+            }
             for movie in await RecordingExport.recoverableMovies() {
                 do {
                     try await finishRecording(movie: movie, isGIF: false, recovered: true)

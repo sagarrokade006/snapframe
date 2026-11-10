@@ -98,7 +98,7 @@ public struct LibraryIndex: Codable, Equatable, Sendable {
     public mutating func purge(olderThanDays days: Int, now: Date) -> [CaptureItem] {
         guard days > 0 else { return [] }
         let cutoff = now.addingTimeInterval(-Double(days) * 86_400)
-        let expired = items.filter { !$0.isPinned && $0.createdAt < cutoff }
+        let expired = items.filter { !$0.isPinned && !$0.isStudio && $0.createdAt < cutoff }
         let ids = Set(expired.map(\.id))
         items.removeAll { ids.contains($0.id) }
         return expired

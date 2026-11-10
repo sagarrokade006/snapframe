@@ -8,7 +8,8 @@ import SwiftUI
 
 struct RecordingOutput {
     let movie: URL
-    let isGIF: Bool
+    let mode: RecordMode
+    var isGIF: Bool { mode == .gif }
 }
 
 /// Runs a recording from setup to stop. Only the HUD and setup panel stay out of the video.
@@ -31,6 +32,7 @@ final class RecordingController: ObservableObject {
     private var hud: NSPanel?
     private var setup: NSPanel?
     private var ticker: Timer?
+    private var activeCamera: CameraBubble?
 
     private static let minimumStartBytes: Int64 = 1_000_000_000
     private static let minimumRunningBytes: Int64 = 300_000_000
@@ -48,7 +50,13 @@ final class RecordingController: ObservableObject {
 
     func togglePause() {
         guard let writer else { return }
-        if isPaused { writer.resume() } else { writer.pause() }
+        if isPaused {
+            writer.resume()
+            activeCamera?.resumeFile()
+        } else {
+            writer.pause()
+            activeCamera?.pauseFile()
+        }
         isPaused.toggle()
     }
 
@@ -70,7 +78,8 @@ final class RecordingController: ObservableObject {
         guard await askForOptions(region: region, screen: screen) else { return nil }
 
         let settings = AppSettings.shared
-        let isGIF = settings.recordOutputGIF
+        let mode = settings.recordMode
+        let isGIF = mode == .gif
         var useMicrophone = false
         if !isGIF && settings.recordMicrophone { useMicrophone = await AVCaptureDevice.requestAccess(for: .audio) }
         var useCamera = false
@@ -85,7 +94,7 @@ final class RecordingController: ObservableObject {
             guard await CountdownController.run(seconds: 3) else { return nil }
             let result = try await record(
                 displayID: displayID, rect: rect, region: region, screen: screen, showsCursor: showsCursor,
-                isGIF: isGIF, useSystem: useSystem, useMicrophone: useMicrophone, useCamera: useCamera
+                mode: mode, useSystem: useSystem, useMicrophone: useMicrophone, useCamera: useCamera
             )
             switch result {
             case .finished(let output): return output
@@ -103,16 +112,24 @@ final class RecordingController: ObservableObject {
 
     private func record(
         displayID: CGDirectDisplayID, rect: CGRect, region: CGRect, screen: NSScreen, showsCursor: Bool,
-        isGIF: Bool, useSystem: Bool, useMicrophone: Bool, useCamera: Bool
+        mode: RecordMode, useSystem: Bool, useMicrophone: Bool, useCamera: Bool
     ) async throws -> Result {
         let settings = AppSettings.shared
-        let camera = useCamera ? CameraBubble(region: region) : nil
-        let activity = ActivityOverlay(region: region, clicks: settings.recordClicks, keys: settings.recordKeystrokes)
+        let isGIF = mode == .gif
+        let isStudio = mode == .studio
+        let workspace = try isStudio ? StudioPackage.create() : RecordingExport.makeWorkspace(isGIF: isGIF)
+
+        // Studio redraws the cursor, clicks, keys and camera later, so they stay out of the screen video.
+        let cameraFile = isStudio && useCamera ? workspace.appendingPathComponent(StudioProject.cameraFile) : nil
+        let camera = useCamera ? CameraBubble(region: region, recordingTo: cameraFile) : nil
+        let activity = isStudio ? nil : ActivityOverlay(region: region, clicks: settings.recordClicks, keys: settings.recordKeystrokes)
+        activeCamera = camera
         defer {
             camera?.close()
-            activity.close()
+            activity?.close()
+            activeCamera = nil
         }
-        let included = Set([camera?.windowID, activity.windowID].compactMap { $0 })
+        let included = Set(isStudio ? [] : [camera?.windowID, activity?.windowID].compactMap { $0 })
 
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
         guard let display = content.displays.first(where: { $0.displayID == displayID }) else { throw RecordingError.displayNotFound }
@@ -137,14 +154,13 @@ final class RecordingController: ObservableObject {
         configuration.queueDepth = 8
         configuration.pixelFormat = kCVPixelFormatType_32BGRA
         configuration.colorSpaceName = CGColorSpace.sRGB
-        configuration.showsCursor = showsCursor
+        configuration.showsCursor = showsCursor && !isStudio
         configuration.capturesAudio = useSystem
         configuration.excludesCurrentProcessAudio = true
         configuration.sampleRate = 48_000
         configuration.channelCount = 2
 
-        let workspace = try RecordingExport.makeWorkspace(isGIF: isGIF)
-        let movie = RecordingExport.movieURL(in: workspace)
+        let movie = isStudio ? workspace.appendingPathComponent(StudioProject.screenFile) : RecordingExport.movieURL(in: workspace)
         let writer = try RecordingWriter(
             url: movie, width: size.width, height: size.height, framesPerSecond: frameRate,
             system: useSystem, microphone: useMicrophone
@@ -165,6 +181,33 @@ final class RecordingController: ObservableObject {
             throw error
         }
 
+        var tracker: StudioTracker?
+        var project = StudioProject(
+            name: NameTemplate(pattern: settings.namePattern).render(date: Date(), mode: "Studio"),
+            duration: 0, pixelWidth: size.width, pixelHeight: size.height, scale: Double(size.width) / Double(rect.width)
+        )
+        project.hasCamera = cameraFile != nil
+        project.hasSystemAudio = useSystem
+        project.hasMicrophone = useMicrophone
+
+        func saveProgress() {
+            guard let tracker else { return }
+            project.mouse = tracker.mouse
+            project.clicks = tracker.clicks
+            project.keys = tracker.keys
+            project.windows = tracker.windows
+            StudioPackage.save(project, to: workspace)
+        }
+        if isStudio {
+            tracker = StudioTracker(
+                region: region, elapsed: { writer.elapsed }, isPaused: { [weak self] in self?.isPaused ?? false },
+                logsKeys: settings.recordKeystrokes, autosave: { saveProgress() }
+            )
+            saveProgress()
+            tracker?.start()
+            camera?.startFile { project.cameraOffset = writer.elapsed }
+        }
+
         self.writer = writer
         isPaused = false
         elapsed = 0
@@ -180,6 +223,8 @@ final class RecordingController: ObservableObject {
         isRecording = false
         self.writer = nil
         await recorder.stop()
+        tracker?.stop()
+        if command == .stop { await camera?.finishFile() }
 
         switch command {
         case .stop:
@@ -189,7 +234,8 @@ final class RecordingController: ObservableObject {
                 RecordingExport.removeWorkspace(of: movie)
                 throw error
             }
-            return .finished(RecordingOutput(movie: movie, isGIF: isGIF))
+            if isStudio { saveProgress() }
+            return .finished(RecordingOutput(movie: movie, mode: mode))
         case .discard:
             writer.cancel()
             RecordingExport.removeWorkspace(of: movie)
@@ -288,20 +334,20 @@ struct RecordingSetupView: View {
             Text("Record").font(.snapDisplay(18))
 
             PillSegment(
-                options: [(false, "Video"), (true, "GIF")],
-                selection: $settings.recordOutputGIF,
+                options: RecordMode.allCases.map { ($0, $0.title) },
+                selection: $settings.recordMode,
                 activeFill: .snapText
             )
 
             VStack(spacing: 2) {
-                row("Microphone", "mic", $settings.recordMicrophone, enabled: !settings.recordOutputGIF)
-                row("System audio", "speaker.wave.2", $settings.recordSystemAudio, enabled: !settings.recordOutputGIF)
-                row("Camera", "video", $settings.recordCamera, enabled: !settings.recordOutputGIF)
-                row("Highlight clicks", "cursorarrow.click", $settings.recordClicks, enabled: true)
+                row("Microphone", "mic", $settings.recordMicrophone, enabled: settings.recordMode != .gif)
+                row("System audio", "speaker.wave.2", $settings.recordSystemAudio, enabled: settings.recordMode != .gif)
+                row("Camera", "video", $settings.recordCamera, enabled: settings.recordMode != .gif)
+                row("Highlight clicks", "cursorarrow.click", $settings.recordClicks, enabled: settings.recordMode != .studio)
                 row("Show shortcuts pressed", "command", $settings.recordKeystrokes, enabled: true)
             }
 
-            Text(settings.recordOutputGIF ? "Records silently and saves an optimized GIF." : "Saves an MP4 with separate voice and system audio tracks.")
+            Text(modeNote)
                 .font(.system(size: 12))
                 .foregroundStyle(Color.snapMuted)
                 .fixedSize(horizontal: false, vertical: true)
@@ -320,6 +366,14 @@ struct RecordingSetupView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color(hex: 0x36383E)))
         .snapWindowStyle()
+    }
+
+    private var modeNote: String {
+        switch settings.recordMode {
+        case .video: return "Saves an MP4 with separate voice and system audio tracks."
+        case .gif: return "Records silently and saves an optimized GIF."
+        case .studio: return "Opens in the editor. Zoom, cursor, clicks and camera can all be changed after recording."
+        }
     }
 
     private func row(_ title: String, _ symbol: String, _ value: Binding<Bool>, enabled: Bool) -> some View {

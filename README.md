@@ -64,6 +64,21 @@
 | **Never lose a take** | Recordings are recovered automatically after a crash or forced quit |
 | **Trim** | Cut the start and end from Home or the preview card |
 
+### Studio
+
+<div align="center">
+<img src="docs/screenshots/studio.png" width="860" alt="Studio editor with a styled preview, property panels and a timeline">
+</div>
+
+| Feature | What it does |
+|---|---|
+| **Automatic zoom** | Zooms into the moments you clicked, and every zoom can be moved, resized or removed |
+| **Restyled cursor** | Your cursor is recorded separately, so you can resize it, smooth it, swap its style or hide it when idle |
+| **Timeline editing** | Split, trim and delete clips, with full undo |
+| **Styled backgrounds** | Colors, gradients, padding, rounded corners and shadow |
+| **Camera and shortcuts** | Move, resize or mirror your camera after recording, and show the shortcuts you pressed |
+| **Export** | MP4 at the original size, 1440p, 1080p or 720p, rendered on your Mac |
+
 ### Organize
 
 | Feature | What it does |
@@ -182,7 +197,7 @@ Snapframe has no accounts, uploads, online models, analytics or crash reporting.
 - [x] Annotate editor and capture library
 - [x] Scrolling capture, text recognition and automation
 - [x] Screen recording, GIFs and trim
-- [ ] **Studio:** a timeline editor with automatic zoom and a restyled cursor
+- [x] Studio timeline editor with automatic zoom and a restyled cursor
 
 ## Build from source
 

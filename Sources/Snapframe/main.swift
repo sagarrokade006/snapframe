@@ -21,6 +21,24 @@ if let flag = CommandLine.arguments.firstIndex(of: "--scroll-probe"), CommandLin
     application.run()
 }
 
+if let flag = CommandLine.arguments.firstIndex(of: "--studio-check"), CommandLine.arguments.count > flag + 2 {
+    let step = CommandLine.arguments[flag + 1]
+    let directory = URL(fileURLWithPath: CommandLine.arguments[flag + 2], isDirectory: true)
+    try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    Task { @MainActor in
+        switch step {
+        case "synthetic": await PreviewStudio.synthetic(directory: directory)
+        case "editor": await PreviewStudio.editor(directory: directory)
+        case "window": await PreviewStudio.window(directory: directory)
+        case "showcase": await PreviewStudio.showcase(directory: directory)
+        default: await PreviewStudio.real(rect: CGRect(x: 200, y: 180, width: 880, height: 640), seconds: 4, directory: directory)
+        }
+        exit(0)
+    }
+    application.setActivationPolicy(.accessory)
+    application.run()
+}
+
 if let flag = CommandLine.arguments.firstIndex(of: "--record-check"), CommandLine.arguments.count > flag + 2 {
     let step = CommandLine.arguments[flag + 1]
     let directory = URL(fileURLWithPath: CommandLine.arguments[flag + 2], isDirectory: true)

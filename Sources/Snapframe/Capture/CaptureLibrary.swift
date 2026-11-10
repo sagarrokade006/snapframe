@@ -192,6 +192,7 @@ final class CaptureLibrary: ObservableObject {
         try? FileManager.default.removeItem(at: imageURL(id: item.id))
         try? FileManager.default.removeItem(at: thumbnailURL(id: item.id))
         try? FileManager.default.removeItem(at: projectURL(id: item.id))
+        if item.isStudio, let path = item.savedPath { try? FileManager.default.removeItem(atPath: path) }
         thumbnails.removeObject(forKey: item.id as NSUUID)
     }
 

@@ -8,10 +8,15 @@ import SwiftUI
 final class CameraBubble {
     private let panel: KeylessPanel
     private let session = AVCaptureSession()
+    private let movieOutput = AVCaptureMovieFileOutput()
+    private var recorder: CameraFileDelegate?
+    private var file: URL?
+    private let startQueue = DispatchQueue(label: "app.snapframe.camera-start")
 
     var windowID: CGWindowID { CGWindowID(panel.windowNumber) }
 
-    init(region: CGRect) {
+    /// With a file, the camera is also saved separately so Studio can restyle it later.
+    init(region: CGRect, recordingTo file: URL? = nil) {
         let side = min(180, min(region.width, region.height) / 2)
         panel = KeylessPanel(size: CGSize(width: side, height: side))
         panel.level = .statusBar
@@ -33,8 +38,13 @@ final class CameraBubble {
                 connection.isVideoMirrored = true
             }
             view.layer?.addSublayer(preview)
+            if let file, session.canAddOutput(movieOutput) {
+                session.addOutput(movieOutput)
+                recorder = CameraFileDelegate()
+                self.file = file
+            }
             let running = session
-            DispatchQueue.global(qos: .userInitiated).async { running.startRunning() }
+            startQueue.async { running.startRunning() }
         }
 
         panel.contentView = view
@@ -42,10 +52,46 @@ final class CameraBubble {
         panel.orderFrontRegardless()
     }
 
+    /// Starts the camera file, and reports the moment it really begins so it can be lined up with the screen.
+    func startFile(onStart: @escaping () -> Void) {
+        guard let file, let recorder else { return }
+        recorder.started = onStart
+        let output = movieOutput
+        startQueue.async { output.startRecording(to: file, recordingDelegate: recorder) }
+    }
+
+    func pauseFile() { if movieOutput.isRecording { movieOutput.pauseRecording() } }
+    func resumeFile() { if movieOutput.isRecordingPaused { movieOutput.resumeRecording() } }
+
+    /// Waits for the camera file to be fully written.
+    func finishFile() async {
+        guard let recorder, movieOutput.isRecording else { return }
+        await withCheckedContinuation { continuation in
+            recorder.finished = { continuation.resume() }
+            movieOutput.stopRecording()
+        }
+    }
+
     func close() {
         let running = session
         DispatchQueue.global(qos: .userInitiated).async { running.stopRunning() }
         panel.close()
+    }
+}
+
+private final class CameraFileDelegate: NSObject, AVCaptureFileOutputRecordingDelegate, @unchecked Sendable {
+    var started: (() -> Void)?
+    var finished: (() -> Void)?
+
+    func fileOutput(_ output: AVCaptureFileOutput, didStartRecordingTo fileURL: URL, from connections: [AVCaptureConnection]) {
+        guard let started else { return }
+        self.started = nil
+        DispatchQueue.main.async { started() }
+    }
+
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        finished?()
+        finished = nil
     }
 }
 

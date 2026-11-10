@@ -85,6 +85,9 @@ extension CaptureItem {
     public static let recordingKind = "Recording"
     public static let gifKind = "GIF"
 
+    public static let studioKind = "Studio"
+
+    public var isStudio: Bool { kind == Self.studioKind }
     public var isVideo: Bool { kind == Self.recordingKind || kind == Self.gifKind }
     public var canTrim: Bool { kind == Self.recordingKind }
 }

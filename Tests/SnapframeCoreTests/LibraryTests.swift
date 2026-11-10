@@ -41,6 +41,11 @@ final class LibraryIndexTests: XCTestCase {
         XCTAssertEqual(index.items.map(\.name), ["recent", "oldPinned"])
     }
 
+    func testStudioProjectsAreNeverAutoDeleted() {
+        var index = LibraryIndex(items: [item("project", kind: CaptureItem.studioKind, daysOld: 400)])
+        XCTAssertTrue(index.purge(olderThanDays: 30, now: now).isEmpty)
+    }
+
     func testPurgeZeroKeepsEverything() {
         var index = LibraryIndex(items: [item("old", daysOld: 4000)])
         XCTAssertTrue(index.purge(olderThanDays: 0, now: now).isEmpty)

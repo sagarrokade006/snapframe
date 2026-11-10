@@ -193,6 +193,7 @@ struct HomeView: View {
                     filter("Fullscreen", value: "Fullscreen")
                     filter("Scrolling", value: "Scrolling")
                     filter("Video", value: CaptureItem.recordingKind)
+                    filter("Studio", value: CaptureItem.studioKind)
                 }
 
                 if visible.isEmpty {
@@ -378,8 +379,12 @@ struct CaptureInspector: View {
             }
 
             HStack(spacing: 6) {
-                IconAction(title: "Copy", symbol: "doc.on.doc", primary: true) { library.copy(item) }
-                if item.isVideo {
+                if !item.isStudio {
+                    IconAction(title: "Copy", symbol: "doc.on.doc", primary: true) { library.copy(item) }
+                }
+                if item.isStudio {
+                    IconAction(title: "Open Editor", symbol: "film", primary: true) { StudioController.shared.open(item) }
+                } else if item.isVideo {
                     IconAction(title: "Play", symbol: "play.fill") { library.open(item) }
                     if item.canTrim {
                         IconAction(title: "Trim", symbol: "timeline.selection") { TrimController.shared.open(item) }
@@ -388,7 +393,9 @@ struct CaptureInspector: View {
                     IconAction(title: "Edit", symbol: "pencil.tip.crop.circle") { AnnotateController.shared.open(item) }
                     IconAction(title: "Float", symbol: "pip") { PinController.shared.pin(item) }
                 }
-                IconAction(title: "Share", symbol: "square.and.arrow.up") { ShareSheet.show(library.existingFile(for: item)) }
+                if !item.isStudio {
+                    IconAction(title: "Share", symbol: "square.and.arrow.up") { ShareSheet.show(library.existingFile(for: item)) }
+                }
                 IconAction(title: "Reveal", symbol: "folder") { library.reveal(item) }
             }
 
@@ -448,10 +455,24 @@ struct CaptureInspector: View {
                 Button(item.isPinned ? "Unpin" : "Pin to Library") { library.togglePinned(item) }
                     .buttonStyle(QuietButtonStyle())
                 Spacer()
-                Button("Delete") { library.delete(item) }
+                Button("Delete") { confirmDelete(item) }
                     .buttonStyle(QuietButtonStyle())
             }
         }
+    }
+
+    /// A Studio project exists only here, so deleting it needs a second look.
+    private func confirmDelete(_ item: CaptureItem) {
+        guard item.isStudio else {
+            library.delete(item)
+            return
+        }
+        let alert = NSAlert()
+        alert.messageText = "Delete this Studio project?"
+        alert.informativeText = "Its recording and edits will be removed. Videos you already exported are kept."
+        alert.addButton(withTitle: "Delete")
+        alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn { library.delete(item) }
     }
 
     private func meta(_ key: String, _ value: String, divider: Bool = true) -> some View {
@@ -474,6 +495,7 @@ struct CaptureInspector: View {
 
     private func retention(_ item: CaptureItem) -> String {
         if item.isPinned { return "Off while pinned" }
+        if item.isStudio { return "Never" }
         return settings.libraryRetentionDays == 0 ? "Never" : "After \(settings.libraryRetentionDays) days"
     }
 }
