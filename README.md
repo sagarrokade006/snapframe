@@ -18,7 +18,7 @@
 
 ## Why Snapframe
 
-- **Every feature is free.** There are no tiers, subscriptions or licenses.
+- **Every feature is free.** There are no tiers, subscriptions or license keys.
 - **Your captures stay on your Mac.** There are no accounts, uploads or online models.
 - **It stays out of the way.** Snapframe lives in the menu bar and is one shortcut away.
 
@@ -209,3 +209,7 @@ cd snapframe
 swift build
 swift test
 ```
+
+## License
+
+Snapframe is released under the [MIT License](LICENSE).
