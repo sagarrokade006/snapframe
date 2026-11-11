@@ -25,10 +25,9 @@
   <div class="wrap nav-inner">
     <a class="brand" href="#top"><img src="icon.png" width="32" height="32" alt=""><span>Snapframe</span></a>
     <nav class="nav-links" aria-label="Main">
-      <a href="#capture">Capture</a>
-      <a href="#annotate">Annotate</a>
-      <a href="#record">Record</a>
+      <a href="#features">Features</a>
       <a href="#studio">Studio</a>
+      <a href="#themes">Themes</a>
       <a href="#everything">Everything</a>
       <a href="#privacy">Privacy</a>
       <a href="#changelog">Changelog</a>
@@ -46,11 +45,10 @@
   <div class="wrap hero-copy">
     <p class="eyebrow reveal">For macOS 14 and later</p>
     <h1 class="hero-title">
-      <span class="line"><span>Capture anything.</span></span>
-      <span class="line"><span>Mark it up.</span></span>
+      <span class="line"><span>Capture anything. Mark it up.</span></span>
       <span class="line"><span class="accent">Keep it yours.</span></span>
     </h1>
-    <p class="lede reveal" style="--d:.25s">Screenshots, scrolling capture, text recognition, annotation and screen recording in one menu-bar app. Every feature is free. There are no accounts and no cloud.</p>
+    <p class="lede reveal" style="--d:.25s">Screenshots, annotation, screen recording and a video editor in one menu-bar app. Every feature is free. There are no accounts and no cloud.</p>
     <div class="cta reveal" style="--d:.35s">
       <a class="btn js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download for Mac <span class="btn-note js-version"></span></a>
       <a class="btn btn-ghost" href="#install">How to install</a>
@@ -60,8 +58,9 @@
 
   <div class="wrap hero-stage" id="heroStage">
     <div class="hero-window">
-      <img src="screenshots/home.png" width="1600" height="1000" alt="Snapframe Home window with capture tiles, recent captures and a details panel" fetchpriority="high">
+      <img src="screenshots/site/home.jpg" width="1600" height="1000" alt="Snapframe Home window with capture tiles, recent captures and a details panel" fetchpriority="high">
       <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <span class="hero-toast">Saved and copied</span>
     </div>
     <img class="float float-left" data-speed="-0.08" src="screenshots/popover.png" width="384" alt="Menu bar popover with capture tiles" loading="lazy">
     <img class="float float-right" data-speed="-0.14" src="screenshots/record-setup.png" width="300" alt="Recording options panel" loading="lazy">
@@ -77,21 +76,13 @@
   </div>
 </section>
 
-<section class="feature" id="capture">
-  <div class="wrap split">
-    <div class="split-copy reveal">
-      <p class="eyebrow">Capture</p>
-      <h2>Select exactly what you mean.</h2>
-      <p>Freeze the screen, drag an area and let edges snap to windows. A loupe shows every pixel and its color, and aspect ratios lock the shape before you start.</p>
-      <ul class="ticks">
-        <li>Area, window, fullscreen and previous area</li>
-        <li>Self-timer of 3, 5 or 10 seconds</li>
-        <li>Works across multiple displays</li>
-        <li>Preview card in Classic or Hover Controls style</li>
-        <li>Floating pins you can resize and make see-through</li>
-      </ul>
-    </div>
-    <div class="stage demo-capture reveal" style="--d:.1s" aria-hidden="true">
+<section class="section bento" id="features">
+  <div class="wrap">
+    <div class="section-head reveal"><p class="eyebrow">What it does</p><h2>One app for every way you show your screen.</h2></div>
+    <div class="bt-grid">
+      <article class="bt bt-4 reveal" id="capture">
+        <div class="bt-copy"><p class="eyebrow">Capture</p><h3>Select exactly what you mean.</h3><p>Freeze the screen, snap to windows and read any pixel with the loupe.</p></div>
+        <div class="stage demo-capture" aria-hidden="true">
       <div class="doc">
         <div class="doc-bar"><i></i><i></i><i></i><b>Launch notes</b></div>
         <div class="doc-body"><h4>Launch notes</h4><p></p><p class="s"></p><p></p><p class="m"></p><h5></h5><p class="s"></p><p></p></div>
@@ -100,46 +91,11 @@
       <div class="loupe"><div class="px"></div><small>#F7F7F5</small></div>
       <div class="flash"></div>
       <div class="qa"><div class="qa-img"><span></span><span></span><span></span></div><div class="qa-row"><b>Saved and copied</b></div></div>
-    </div>
-  </div>
-</section>
-
-<section class="feature alt" id="scrolling">
-  <div class="wrap split reverse">
-    <div class="split-copy reveal">
-      <p class="eyebrow">Scrolling capture</p>
-      <h2>Long pages, one clean image.</h2>
-      <p>Select an area and scroll normally. Snapframe works out which part is actually moving, so sidebars stay out of the result and fixed headers appear only once.</p>
-      <ul class="ticks">
-        <li>Live preview while you scroll</li>
-        <li>Skips sidebars and fixed bars</li>
-        <li>Tells you if you scroll too fast</li>
-      </ul>
-    </div>
-    <div class="stage demo-scroll reveal" style="--d:.1s" aria-hidden="true">
-      <div class="scroll-view">
-        <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
-        <div class="pane"><div class="pane-track"><div class="pg"></div></div></div>
-      </div>
-      <div class="arrow-flow"></div>
-      <div class="scroll-out"><div class="out-fill"><div class="pg"></div></div></div>
-    </div>
-  </div>
-</section>
-
-<section class="feature" id="text">
-  <div class="wrap split">
-    <div class="split-copy reveal">
-      <p class="eyebrow">Text and QR codes</p>
-      <h2>Copy text from anything on screen.</h2>
-      <p>Drag over a video, a photo or a locked PDF and the words land on your clipboard. Recognition runs on your Mac, so nothing is sent anywhere.</p>
-      <ul class="ticks">
-        <li>Automatic language detection</li>
-        <li>Keep or remove line breaks</li>
-        <li>Reads QR codes, and only opens links when you click</li>
-      </ul>
-    </div>
-    <div class="stage demo-text reveal" style="--d:.1s" aria-hidden="true">
+          </div>
+      </article>
+      <article class="bt bt-2 reveal" id="text" style="--d:.08s">
+        <div class="bt-copy"><p class="eyebrow">Text and QR codes</p><h3>Copy text from anything.</h3><p>Recognition runs on your Mac, so nothing is sent anywhere.</p></div>
+        <div class="stage demo-text" aria-hidden="true">
       <div class="ocr-source">
         <span>Check the onboarding copy</span>
         <span>before the next build.</span>
@@ -150,25 +106,22 @@
         <b><i class="dot"></i>Copied to clipboard</b>
         <p class="typed">Check the onboarding copy before the next build. Confirm the shortcut defaults.</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<section class="feature alt" id="annotate">
-  <div class="wrap split reverse">
-    <div class="split-copy reveal">
-      <p class="eyebrow">Annotate</p>
-      <h2>Explain it without a meeting.</h2>
-      <p>Fourteen tools, all editable until you say otherwise. Add a background and your screenshot is ready to post, or reopen it next week and keep working.</p>
-      <ul class="ticks">
-        <li>Arrows, shapes, marker, text, counters and spotlight</li>
-        <li>Colors, gradients, padding, corners and shadow</li>
-        <li>Full undo, and <code>.snapframe</code> project files</li>
-        <li>Redactions that permanently remove the pixels</li>
-        <li>Password-protected PDF export</li>
-      </ul>
-    </div>
-    <div class="stage demo-annotate reveal" style="--d:.1s" aria-hidden="true">
+          </div>
+      </article>
+      <article class="bt bt-2 reveal" id="scrolling">
+        <div class="bt-copy"><p class="eyebrow">Scrolling capture</p><h3>Long pages, one image.</h3><p>Sidebars and fixed headers stay out of the result.</p></div>
+        <div class="stage demo-scroll" aria-hidden="true">
+      <div class="scroll-view">
+        <div class="side"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="pane"><div class="pane-track"><div class="pg"></div></div></div>
+      </div>
+      <div class="arrow-flow"></div>
+      <div class="scroll-out"><div class="out-fill"><div class="pg"></div></div></div>
+          </div>
+      </article>
+      <article class="bt bt-4 reveal" id="annotate" style="--d:.08s">
+        <div class="bt-copy"><p class="eyebrow">Annotate</p><h3>Explain it without a meeting.</h3><p>Arrows, numbered steps, spotlights and redaction that really removes the pixels.</p></div>
+        <div class="stage demo-annotate" aria-hidden="true">
       <div class="backdrop">
         <div class="doc">
           <div class="doc-body">
@@ -189,27 +142,10 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="wrap shot-wide reveal">
-    <img src="screenshots/annotate.png" width="1600" height="1000" alt="Annotate editor with its toolbar, color choices and background panel" loading="lazy">
-  </div>
-</section>
-
-<section class="feature" id="record">
-  <div class="wrap split">
-    <div class="split-copy reveal">
-      <p class="eyebrow">Record</p>
-      <h2>Show it, don't describe it.</h2>
-      <p>Record your screen or any area to MP4 or GIF. Your voice and system audio stay on separate tracks, and if your Mac crashes mid-take, the recording is waiting for you at next launch.</p>
-      <ul class="ticks">
-        <li>Webcam bubble and click highlights</li>
-        <li>Shows shortcuts you press, never ordinary typing</li>
-        <li>Pause, restart or discard from a small control bar</li>
-        <li>Trim from Home or the preview card</li>
-        <li>Up to 60 frames per second</li>
-      </ul>
-    </div>
-    <div class="stage demo-record reveal" style="--d:.1s" aria-hidden="true">
+      </article>
+      <article class="bt bt-3 reveal" id="record">
+        <div class="bt-copy"><p class="eyebrow">Record</p><h3>Show it, don't describe it.</h3><p>MP4 or GIF with separate audio tracks, and recovery if your Mac crashes mid-take.</p></div>
+        <div class="stage demo-record" aria-hidden="true">
       <div class="doc"><div class="doc-body"><h4>Walkthrough</h4><p></p><p class="s"></p><div class="pills"><i class="primary"></i><i></i></div></div></div>
       <div class="ripple"></div>
       <div class="cursor"></div>
@@ -220,27 +156,93 @@
         <div class="meter"><s></s><s></s><s></s><s></s><s></s><s></s></div>
         <b>Pause</b><b class="stop">Stop</b>
       </div>
+          </div>
+      </article>
+      <article class="bt bt-3 reveal" id="card" style="--d:.08s">
+        <div class="bt-copy"><p class="eyebrow">Preview card</p><h3>Your capture, one point away.</h3><p>Pick Classic buttons or a clean card with controls that appear on hover.</p></div>
+        <div class="stage demo-card" aria-hidden="true">
+            <div class="cd"><div class="cd-shot"><div class="doc"><div class="doc-body"><h4>Launch notes</h4><p></p><p class="s"></p><p></p><p class="m"></p></div></div></div>
+              <div class="cd-ui"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><b>Copy</b><b>Save</b></div>
+            </div>
+            <div class="cd-cursor"></div>
+          </div>
+      </article>
+      <article class="bt bt-4 reveal" id="backgrounds">
+        <div class="bt-copy"><p class="eyebrow">Backgrounds</p><h3>Try a background right here.</h3><p>Solids and gradients for Annotate and Studio. Click one to see it.</p></div>
+        <div class="bg-play" id="bgPlay">
+          <div class="bg-view"><div class="doc" id="bgDoc"><div class="doc-bar"><i></i><i></i><i></i><b>Launch notes</b></div><div class="doc-body"><h4>Launch notes</h4><p></p><p class="s"></p><p></p><p class="m"></p></div></div></div>
+          <div class="bg-tools">
+            <div class="bg-modes" role="group" aria-label="Background type"><button type="button" data-mode="none">None</button><button type="button" data-mode="solid">Solid</button><button type="button" data-mode="gradient" class="on">Gradient</button></div>
+            <div class="bg-swatches" id="bgSwatches" role="group" aria-label="Backgrounds"></div>
+            <p class="bg-note">A sample of the 78 in the app. You can also make and save your own.</p>
+          </div>
+        </div>
+      </article>
+      <article class="bt bt-2 reveal" id="pins" style="--d:.08s">
+        <div class="bt-copy"><p class="eyebrow">Floating pins</p><h3>Compare without switching.</h3><p>Keep captures above every window. Resize them, or make them see-through.</p></div>
+        <div class="stage demo-pins" aria-hidden="true">
+            <div class="pin pin-a"><div class="doc"><div class="doc-body"><h4>Before</h4><p></p><p class="s"></p><p></p></div></div></div>
+            <div class="pin pin-b"><div class="doc"><div class="doc-body"><h4>After</h4><p></p><p class="m"></p><p class="s"></p></div></div><i class="pin-grip"></i><i class="pin-slider"><u></u></i></div>
+          </div>
+      </article>
     </div>
   </div>
 </section>
 
-<section class="feature alt" id="studio">
-  <div class="wrap">
-    <div class="split">
-      <div class="split-copy reveal">
+<section class="sp" id="studio">
+  <div class="sp-pin">
+    <div class="wrap sp-grid">
+      <div class="sp-copy">
         <p class="eyebrow">Studio</p>
         <h2>Record once. Polish it after.</h2>
-        <p>Studio keeps your cursor, clicks and camera apart from the screen, so nothing is baked in. Zooms appear where you clicked, and every choice can still be changed before you export.</p>
+        <p class="sp-lede">Your cursor, clicks and camera are kept apart from the screen, so nothing is baked in.</p>
+        <ol class="sp-steps" id="spSteps">
+          <li class="on"><b>Record</b><span>Just your screen, with no cursor burned in.</span></li>
+          <li><b>Style</b><span>Add a background, padding and rounded corners.</span></li>
+          <li><b>Zoom</b><span>Zooms appear where you clicked, and stay editable.</span></li>
+          <li><b>Finish</b><span>Restyle the cursor, add your camera and export.</span></li>
+        </ol>
       </div>
-      <ul class="ticks reveal" style="--d:.1s">
-        <li>Automatic zoom, fully editable on the timeline</li>
-        <li>Resize, smooth, restyle or hide the cursor</li>
-        <li>Split, trim and delete clips, with undo</li>
-        <li>Colors, gradients, padding, corners and shadow</li>
-        <li>Export MP4 up to the original size, rendered on your Mac</li>
-      </ul>
+      <div class="sp-player" id="spPlayer" aria-hidden="true">
+        <div class="sp-view">
+          <div class="sp-bg"></div>
+          <div class="sp-frame"><div class="sp-zoom">
+            <div class="doc"><div class="doc-bar"><i></i><i></i><i></i><b>Product tour</b></div><div class="doc-body"><h4>Product tour</h4><p></p><p class="s"></p><p></p><p class="m"></p><h5></h5><p class="s"></p><p></p></div></div>
+            <span class="sp-ripple"></span>
+            <span class="sp-cur"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M5 3l14 9-6 1-3 6z" fill="#17181a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg><i></i></span>
+          </div></div>
+          <div class="sp-keys"><kbd>⌘</kbd><kbd>K</kbd></div>
+          <div class="sp-cam"></div>
+        </div>
+        <div class="sp-tl">
+          <div class="sp-row"><span>Clips</span><div class="sp-track"><i class="sp-clip"></i></div></div>
+          <div class="sp-row"><span>Zoom</span><div class="sp-track"><i class="sp-zbar">1.7×</i></div></div>
+          <div class="sp-row"><span>Audio</span><div class="sp-track"><i class="sp-wave"></i></div></div>
+          <div class="sp-head"></div>
+        </div>
+      </div>
     </div>
-    <div class="shot-wide reveal"><img src="screenshots/studio.png" width="2000" height="1250" alt="Studio editor with a styled preview, property panels and a timeline" loading="lazy"></div>
+  </div>
+</section>
+
+<section class="th" id="themes">
+  <div class="wrap split">
+    <div class="split-copy reveal">
+      <p class="eyebrow">Themes</p>
+      <h2>Make it look like yours.</h2>
+      <p>Six themes and six accent colors change every window. Try them here.</p>
+      <div class="th-picks" id="thThemes" role="group" aria-label="Theme"></div>
+      <div class="th-accents" id="thAccents" role="group" aria-label="Accent color"></div>
+    </div>
+    <div class="tw reveal" style="--d:.1s" aria-hidden="true">
+      <aside class="tw-side"><i class="tw-logo"></i><i class="on"></i><i></i><i></i><i></i></aside>
+      <div class="tw-main">
+        <div class="tw-title">Home</div>
+        <div class="tw-tiles"><i class="hot"></i><i></i><i></i><i></i></div>
+        <div class="tw-label">Recent captures</div>
+        <div class="tw-cards"><i class="s1"></i><i class="s2"></i><i class="s3"></i></div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -250,14 +252,15 @@
       <p class="eyebrow">A closer look</p>
       <h2>Designed down to the small panels.</h2>
     </div>
-    <div class="gallery">
-      <figure class="reveal"><img src="screenshots/overlay.png" width="1600" height="1000" alt="Capture overlay with its toolbar" loading="lazy"><figcaption>Every capture mode in one toolbar</figcaption></figure>
-      <figure class="reveal" style="--d:.08s"><img src="screenshots/settings.png" width="1400" height="924" alt="File name builder in Settings" loading="lazy"><figcaption>Build file names with chips</figcaption></figure>
-      <figure class="reveal"><img src="screenshots/shortcuts.png" width="1400" height="924" alt="Keyboard shortcut settings" loading="lazy"><figcaption>Change any shortcut</figcaption></figure>
-      <figure class="reveal" style="--d:.08s"><img src="screenshots/update.png" width="1200" height="1033" alt="Update window with a changelog" loading="lazy"><figcaption>Updates that show what changed</figcaption></figure>
-      <figure class="reveal"><img src="screenshots/themes.png" width="1400" height="924" alt="Appearance settings with six themes and accent colors" loading="lazy"><figcaption>Six themes and six accent colors</figcaption></figure>
-      <figure class="reveal" style="--d:.08s"><img src="screenshots/annotate.png" width="1600" height="1000" alt="Annotate editor with solid and gradient backgrounds" loading="lazy"><figcaption>78 backgrounds, or make your own</figcaption></figure>
-    </div>
+  </div>
+  <div class="gallery" tabindex="0" role="group" aria-label="Screenshots, scroll sideways for more">
+    <figure><img src="screenshots/site/studio.jpg" width="1400" height="875" alt="Studio editor with a styled preview and a timeline" loading="lazy"><figcaption>Studio's timeline editor</figcaption></figure>
+    <figure><img src="screenshots/site/annotate.jpg" width="1400" height="875" alt="Annotate editor with solid and gradient backgrounds" loading="lazy"><figcaption>78 backgrounds, or make your own</figcaption></figure>
+    <figure><img src="screenshots/site/overlay.jpg" width="1400" height="875" alt="Capture overlay with its toolbar" loading="lazy"><figcaption>Every capture mode in one toolbar</figcaption></figure>
+    <figure><img src="screenshots/site/themes.jpg" width="1400" height="924" alt="Appearance settings with themes and accent colors" loading="lazy"><figcaption>Themes and preview card styles</figcaption></figure>
+    <figure><img src="screenshots/site/settings.jpg" width="1400" height="924" alt="File name builder in Settings" loading="lazy"><figcaption>Build file names with chips</figcaption></figure>
+    <figure><img src="screenshots/site/shortcuts.jpg" width="1400" height="924" alt="Keyboard shortcut settings" loading="lazy"><figcaption>Change any shortcut</figcaption></figure>
+    <figure><img src="screenshots/site/update.jpg" width="1200" height="1033" alt="Update window with a changelog" loading="lazy"><figcaption>Updates that show what changed</figcaption></figure>
   </div>
 </section>
 
@@ -267,7 +270,7 @@
       <p class="eyebrow">Everything included</p>
       <h2>No paid tier. This is the whole list.</h2>
     </div>
-    <div class="list-grid">
+    <div class="list-grid" id="listGrid">
       <article class="reveal">
         <h3>Capture</h3>
         <ul>
@@ -311,6 +314,7 @@
         </ul>
       </article>
     </div>
+    <p class="list-more"><button class="btn btn-ghost btn-small" type="button" id="listMore" aria-expanded="false" hidden>Show the full list</button></p>
   </div>
 </section>
 
@@ -394,20 +398,25 @@
   </div>
 </section>
 
-<section class="section roadmap">
-  <div class="wrap">
-    <div class="section-head reveal"><p class="eyebrow">Built so far</p><h2>All five parts are here.</h2><p>Capture, Annotate, smart capture, recording and Studio are all in the app, and all free. Improvements arrive as in-app updates.</p></div>
-    <ol class="timeline reveal">
-      <li class="done"><b>Capture</b></li>
-      <li class="done"><b>Annotate</b></li>
-      <li class="done"><b>Smart capture</b></li>
-      <li class="done"><b>Recording</b></li>
-      <li class="done"><b>Studio</b></li>
-    </ol>
+<section class="final" id="get">
+  <div class="wrap reveal">
+    <img src="icon.png" width="92" height="92" alt="">
+    <h2>Capture anything.<br>Keep it yours.</h2>
+    <p>Every feature is free. No accounts, no cloud, ready in a minute.</p>
+    <div class="cta center">
+      <a class="btn js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download for Mac <span class="btn-note js-version"></span></a>
+      <a class="btn btn-ghost" href="https://github.com/sagarrokade006/snapframe">View on GitHub</a>
+    </div>
   </div>
 </section>
 
 </main>
+
+<div class="sticky" id="stickyBar">
+  <img src="icon.png" width="32" height="32" alt="">
+  <span class="sticky-text"><b>Snapframe <span class="js-version"></span></b><small>Apple silicon and Intel</small></span>
+  <a class="btn btn-small js-download" href="https://github.com/sagarrokade006/snapframe/releases/latest">Download</a>
+</div>
 
 <footer class="footer">
   <div class="wrap footer-inner">
