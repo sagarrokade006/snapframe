@@ -278,6 +278,12 @@ details p { padding: 0 40px 22px 0; color: #c8cad0; }
 .chip-improved, .chip-better { background: #8fb7d9; }
 .chip-fixed { background: #f2c14e; }
 .more { margin-top: 18px; }
+#changelog .more { margin-top: 26px; }
+.changelog-page { padding-top: 130px; }
+.changelog-page h1 { font: 650 clamp(36px, 5vw, 56px)/1.08 var(--display); letter-spacing: -.02em; }
+.back { margin-bottom: 26px; }
+.back a { color: var(--muted); text-decoration: none; font-size: 15px; }
+.back a:hover { color: var(--text); }
 .more a { color: var(--accent-soft); }
 
 /* Roadmap */

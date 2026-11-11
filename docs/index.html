@@ -15,6 +15,7 @@
 <link rel="icon" href="icon.png">
 <script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="site.css">
+<script src="releases.js" defer></script>
 <script src="site.js" defer></script>
 </head>
 <body>
@@ -388,13 +389,12 @@
 
 <section class="section" id="changelog">
   <div class="wrap narrow">
-    <div class="section-head reveal"><p class="eyebrow">Changelog</p><h2>Recent releases.</h2></div>
-    <div id="releases">
-      <article class="release reveal"><header><b>1.7.0</b></header><ul><li>Choose a Classic or Hover Controls preview card</li><li>Resize floating pins by dragging a corner</li><li>Make pins see-through to compare captures</li></ul></article>
-      <article class="release reveal"><header><b>1.6.1</b></header><ul><li>Six themes and six accent colors</li><li>48 solid colors and 30 gradients, or make and save your own</li><li>Files deleted in Finder now leave the library too</li></ul></article>
-      <article class="release reveal"><header><b>1.5.0</b></header><ul><li>Studio timeline editor with automatic zoom</li><li>Restyled cursor, styled backgrounds and movable camera</li><li>MP4 export rendered on your Mac</li></ul></article>
+    <div class="section-head reveal"><p class="eyebrow">Changelog</p><h2>What's new.</h2></div>
+    <div id="releases" data-limit="2">
+      <article class="release reveal"><header><b>1.7.0</b><time datetime="2026-11-10T08:58:39Z">Nov 10, 2026</time></header><ul><li><span class="chip chip-new">New</span>Choose your preview card style in Settings under Appearance: Classic, or Hover Controls with a clean preview and controls that appear when you point at it.</li><li><span class="chip chip-new">New</span>Save from the Hover Controls card to keep a copy anywhere.</li><li><span class="chip chip-new">New</span>Resize floating pins by dragging the corner. They keep their shape and stay on screen.</li><li><span class="chip chip-new">New</span>An opacity slider on floating pins, so you can see through one to compare captures.</li></ul></article>
+      <article class="release reveal"><header><b>1.6.1</b><time datetime="2026-11-10T08:49:57Z">Nov 10, 2026</time></header><ul><li><span class="chip chip-new">New</span>Six themes in Settings under Appearance: System, Graphite, Daylight, Safelight, Deep Sea and Aurora.</li><li><span class="chip chip-new">New</span>Six accent colors that apply across the whole app.</li><li><span class="chip chip-new">New</span>A background picker in Annotate and Studio with None, Solid and Gradient, including 48 solid colors and 30 gradients.</li><li><span class="chip chip-new">New</span>Make your own solid color or gradient with any angle, and save it to Your colors.</li><li><span class="chip chip-improved">Improved</span>Text and accent colors stay readable on every theme.</li><li><span class="chip chip-fixed">Fixed</span>A capture whose saved file was deleted in Finder now leaves the library too. Files on an unplugged drive are kept.</li></ul></article>
     </div>
-    <p class="more reveal"><a href="https://github.com/sagarrokade006/snapframe/releases">All releases on GitHub</a></p>
+    <p class="more reveal"><a class="btn btn-ghost btn-small" href="changelog.html">See every release</a></p>
   </div>
 </section>
 
